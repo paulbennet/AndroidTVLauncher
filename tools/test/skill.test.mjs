@@ -45,8 +45,9 @@ test('skill links and repo paths resolve', () => {
       assert.ok(existsSync(join(dirname(join(skillDir, f)), link)), `${f}: ${link}`);
     }
     // Repo files the skill names in backticks must exist (docs, scripts, source files).
+    const localOnly = new Set(['scripts/env.local.sh']); // git-ignored on purpose: each developer writes their own
     for (const [, p] of md.matchAll(/`((?:docs|scripts|tools|app\/src\/main)\/[\w./-]+\.(?:md|sh|mjs|js|kt|xml))`/g))
-      assert.ok(existsSync(join(root, p)) || existsSync(join(skillDir, p)), `${f}: repo or skill path ${p}`);
+      assert.ok(localOnly.has(p) || existsSync(join(root, p)) || existsSync(join(skillDir, p)), `${f}: repo or skill path ${p}`);
     for (const [, d] of md.matchAll(/docs\/([\w-]+\.md)/g)) assert.ok(existsSync(join(root, 'docs', d)), `${f}: docs/${d}`);
   }
 });
