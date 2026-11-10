@@ -93,7 +93,7 @@ test('l3-basic: the core keeps the keys, the frame moves focus, OK and Menu act 
   assert.equal(await page.evaluate(() => document.querySelector('lx-overlay').shadowRoot.querySelector('.title').textContent), 'Launcher settings');
 });
 
-test('l3-hostile: no parent, storage, network, popups or navigation; stolen focus comes back; unknown ids rejected', { timeout: 60000 }, async () => {
+test('l3-hostile: no parent, storage, network, popups or navigation; stolen focus comes back; unknown ids rejected', { timeout: 60000 }, async t => {
   // The focus guard listens for the window's blur, and a page without window focus never blurs. On a headless CI
   // runner it has none, so emulate focus (CDP) and wait for the result, not a fixed time.
   await page.bringToFront();
@@ -106,7 +106,15 @@ test('l3-hostile: no parent, storage, network, popups or navigation; stolen focu
   for (const k of ['parentDocument', 'topLocation', 'localStorage', 'cookie', 'bridge', 'openWindow', 'topNavigate', 'fetchCore', 'fetchExternal', 'imageExternal', 'bridgeCall', 'webrtc', 'webSocket'])
     assert.match(r[k], /^blocked/, `${k}: ${r[k]}`);
   assert.equal(r.claimed, true);
-  assert.ok(logs.some(l => l.startsWith('L3_FOCUS_RECLAIMED')), 'focus steal noticed');
+  // What matters: the frame doesn't keep the focus (it would get the remote's keys). Where the browser lets the steal
+  // happen (Windows, Android WebView), the guard must have taken it back. Linux headless Chrome may not move the
+  // focus at all, and then there is nothing to reclaim.
+  if (!logs.some(l => l.startsWith('L3_FOCUS_RECLAIMED'))) {
+    const parentActive = await page.evaluate(() => document.activeElement.tagName);
+    const frameFocused = await frame.evaluate(() => document.hasFocus());
+    t.diagnostic(`no reclaim log: parent activeElement=${parentActive}, frame hasFocus=${frameFocused}`);
+    assert.ok(parentActive !== 'IFRAME' && !frameFocused, `focus steal noticed (parent activeElement=${parentActive}, frame hasFocus=${frameFocused})`);
+  }
   assert.equal(await page.evaluate(() => document.activeElement.tagName), 'BODY');
   assert.ok(logs.some(l => l === 'L3_REJECTED focused com.evil.app'));
   await press('Enter'); // its last report was an id the core never sent, and `activate` is not a message
