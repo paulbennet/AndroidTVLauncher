@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "web-tv-launcher",
+  "owner": { "name": "Paul Bennet", "url": "https://github.com/paulbennet" },
+  "description": "Agent plugin for Web TV Launcher: TV setup, development, troubleshooting and skin making.",
+  "plugins": [
+    {
+      "name": "web-tv-launcher",
+      "source": "./",
+      "description": "Set up, develop, troubleshoot and make skins for Web TV Launcher (Android TV / Google TV).",
+      "version": "1.1.0",
+      "category": "development",
+      "tags": ["android-tv", "google-tv", "launcher", "skins"]
+    }
+  ]
+}

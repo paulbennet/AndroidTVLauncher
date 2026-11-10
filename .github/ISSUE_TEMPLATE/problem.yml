@@ -1,0 +1,24 @@
+name: Problem or new edge case
+description: Something doesn't work, on a TV or in the repo (agents: see skills/web-tv-launcher/references/new-problems.md)
+labels: [problem]
+body:
+  - type: markdown
+    attributes:
+      value: Please remove anything personal (names, e-mail addresses, Wi-Fi names, photos) from logs and screenshots.
+  - type: input
+    id: tv
+    attributes: { label: TV, description: "Model, Android version, WebView version, Web Launcher version (Launcher settings → About)" }
+    validations: { required: true }
+  - type: textarea
+    id: what
+    attributes: { label: What happened, description: Steps and what you saw }
+    validations: { required: true }
+  - type: textarea
+    id: expected
+    attributes: { label: What you expected }
+  - type: textarea
+    id: evidence
+    attributes: { label: Evidence, description: "Output of skills/web-tv-launcher/scripts/tv-doctor.sh and the relevant `adb logcat -s WebLauncher` lines", render: text }
+  - type: textarea
+    id: cause
+    attributes: { label: Cause and fix (if known), description: Which part, why, and what worked }

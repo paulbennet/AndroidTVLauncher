@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "web-tv-launcher",
+  "displayName": "Web TV Launcher",
+  "version": "1.1.0",
+  "description": "Set up Web TV Launcher on Android TV / Google TV (also for non-engineers), develop it, troubleshoot new problems, and design, lint, bench, pack, publish, install and debug skins.",
+  "author": { "name": "Paul Bennet", "url": "https://github.com/paulbennet" },
+  "homepage": "https://paulbennet.github.io/AndroidTVLauncher/",
+  "repository": "https://github.com/paulbennet/AndroidTVLauncher",
+  "license": "MIT",
+  "keywords": ["android-tv", "google-tv", "launcher", "skins", "webview", "adb"]
+}

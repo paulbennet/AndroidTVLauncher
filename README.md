@@ -69,6 +69,23 @@ node tools/lx.mjs bench my-skin --tv 192.168.1.20:5555      # score and tier on 
 node tools/lx.mjs pack my-skin                              # my-skin-0.1.0.lxskin to share
 ```
 
+## AI agents
+The repo ships an agent skill, **`web-tv-launcher`**, for Claude Code, Codex, GitHub Copilot and other agents that
+read `SKILL.md`. It walks non-engineers through TV setup step by step, helps engineers build and debug, covers the
+whole skin life cycle (design, lint, bench, pack, publish, install, test, debug, maintain), includes a read-only TV
+health check (`scripts/tv-doctor.sh`), and a method for problems nobody has documented yet.
+
+| Agent | Install |
+|---|---|
+| Claude Code | `claude plugin marketplace add paulbennet/AndroidTVLauncher` then `claude plugin install web-tv-launcher@web-tv-launcher` |
+| Codex | `codex plugin marketplace add paulbennet/AndroidTVLauncher` then `codex plugin add web-tv-launcher@web-tv-launcher` |
+| Any agent (skills.sh) | `npx skills add paulbennet/AndroidTVLauncher` |
+| GitHub CLI | `gh skill install paulbennet/AndroidTVLauncher web-tv-launcher --agent claude-code` (or `codex`, `github-copilot`, …) |
+| In a clone | Agents read [AGENTS.md](AGENTS.md) (and `CLAUDE.md`), which point to the skill |
+
+The skill lives in [skills/web-tv-launcher/](skills/web-tv-launcher/SKILL.md); manifests: `.claude-plugin/`,
+`plugin.json`, `.codex-plugin/`, `.agents/plugins/`.
+
 ## Documentation
 | | |
 |---|---|
