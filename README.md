@@ -1,109 +1,85 @@
 # Web TV Launcher
 
-An Android TV home screen whose UI is plain HTML/JS/CSS, hosted by a small Kotlin WebView shell (release APK about
-165 KB). Anyone can write a **skin**, from a few CSS tokens up to a full sandboxed JS page, and every skin is
-linted and measured against a performance budget. Skin authors: [docs/skin-api.md](docs/skin-api.md).
-Design, decisions and progress: [docs/launcher-v1-plan.md](docs/launcher-v1-plan.md).
+A light home screen for Android TV and Google TV. Its whole UI is plain HTML, CSS and JavaScript in a small Kotlin
+WebView shell, so anyone who can build a web page can **reskin the TV**, and every skin is checked against a
+performance budget before it reaches a TV.
 
-**Version 1.1.0.** Built and measured on a Sony Bravia VU31 (Google TV, Android 14, ARMv7, 2 GB RAM, Android System
-WebView 156); also checked on the Android TV 12 emulator. Needs Android 7+ (minSdk 24).
+| Default | Minimal |
+|---|---|
+| ![Default skin](docs/img/skin-default.png) | ![Minimal skin](docs/img/skin-minimal.png) |
+| **Marquee** | **Shelf** |
+| ![Marquee skin](docs/img/skin-marquee.png) | ![Shelf skin](docs/img/skin-shelf.png) |
+
+**Version 1.1.0** · Android 7+ (minSdk 24) · built and measured on a Sony Bravia VU31 (Google TV, Android 14, 2 GB RAM)
+· MIT licence
+
+## Why use it
+- **Skins are web pages, with no build step.** Four levels: colour and size tokens, CSS for the stable components,
+  a layout file, or your own sandboxed page with JavaScript (frameworks allowed). Editor types (`lx.d.ts`) without
+  a compiler. → [skin-api.md](docs/skin-api.md)
+- **Skins can't hurt the TV or the user.** They have no network, can't call the native bridge, and can launch only
+  apps the core gave them, and only when the user presses OK. A runtime guard returns to the default skin when a
+  skin hangs, crashes, janks or uses too much memory. Hold **Back** for 5 s for safe mode. → [SECURITY.md](SECURITY.md)
+- **A performance budget with numbers.** `lx lint` (file and image sizes, CSS rules, idle animation) and
+  `lx bench --tv` (janky frames per key, p95 frame, key latency, cold start and memory, relative to the default skin on
+  the same TV) give every skin a score and a tier: Lite, Standard or Rich.
+- **Fast skin work on a real TV.** `lx dev --tv` installs and shows the skin on every save, in about 1 s.
+  `lx pack` makes a `.lxskin` file; users install it from a phone (LAN page and PIN), a link, a QR code, ADB or a
+  gallery.
+- **Small and quiet.** APK about 170 KB. No ads, no analytics, no account, no Google services. The network is used only
+  to download skins the user asks for and for the LAN install page while it is on screen.
+- **Gives memory back.** Hidden for 60 s, it frees its WebView; after 2 minutes it ends its process. Google TV's own
+  home stays in memory.
+- **Covers Google TV home without root.** After boot, after a wake from standby and on Home, through one accessibility
+  switch that sees only Google TV home's window events. → [setup guide](docs/setup-guide.md)
+- **Useful on its own:** favourites you can reorder, hidden apps, a Recent row, HDMI inputs, clock, settings export
+  and import.
+
+## Limits
+- Google TV home shows for about a second before Web Launcher comes back (a key mapper app fixes it for Home).
+- Idle memory is about the same as Google TV home on the VU31 (144–150 MB with the renderer, against about 136 MB);
+  the gain is when it is hidden. Numbers: [development.md](docs/development.md#measuring-on-the-tv).
+- WebView costs 25–30 ms on the first frame after each key on a Mali-G31; skins can't remove it.
+- Web DRM is Widevine L3 only, so video stays in native apps. Not on Google Play.
 
 ## Install
-**On the TV, no computer needed: [Set up on your TV](docs/setup-guide.md).** In short: install **Downloader** from
-the Play Store, open `paulbennet.github.io/AndroidTVLauncher/apk` in it, install, open Web Launcher, and follow
-**Set up this TV** (one switch in TV Settings → Accessibility).
+**Everyone:** [Set up on your TV](docs/setup-guide.md), no computer needed. In short: install **Downloader** from the
+Play Store, open `paulbennet.github.io/AndroidTVLauncher/apk` in it, install, open Web Launcher, and follow
+**Set up this TV**.
 
-With ADB: `adb install web-launcher.apk` from [Releases](../../releases), then the same **Set up this TV** screen.
-The two TV settings can also be set over ADB:
-`adb shell appops set com.weblauncher.tv SYSTEM_ALERT_WINDOW allow` (optional) and the accessibility command under
-"Known limits".
+**With ADB:** `adb install web-launcher.apk` from [Releases](../../releases), then **Set up this TV**, or the two ADB
+commands in [development.md](docs/development.md#setting-up-a-tv-over-adb).
 
-## Layout
-| Path | What |
-|---|---|
-| `app/src/main/java/com/weblauncher/tv/MainActivity.kt` | Hosts the WebView; forwards Back, Menu, Home and resume to JS; manages memory while hidden (see below) |
-| `.../LocalAssetClient.kt` | Serves `assets/web` at `https://launcher.local/` and app images at `/icon/<pkg>`; level 3 skin pages, the SDK and images at `https://skin.local/` (sandboxed iframe only, with CSP); blocks all other origins; rebuilds the WebView if its renderer dies |
-| `.../LauncherBridge.kt` | `window.AndroidLauncher`: `getApps()`, `launch(pkg)`, `openAppInfo(pkg)`, `openSettings()`, `getDeviceInfo()`, plus probe helpers (`frameStatsStart/Stop`, `getAppMemory`, `getStartup`, `keepScreenOn`). Every call takes the page token first (WebView exposes the bridge to every frame); `core/bridge.js` adds it |
-| `.../AppRepository.kt` | Lists Leanback and regular launcher apps; renders each banner (320×180) or icon to WebP, LRU-cached |
-| `.../FrameStats.kt` | Per-frame times from FrameMetrics (the same data as `gfxinfo`): deadline-based jank and GPU time |
-| `.../SkinStore.kt` | Lists and serves skins at `/skins/`: bundled, installed, and dev skins pushed with `lx push` (debug builds, or any build while benching) |
-| `.../SkinInstaller.kt` | Installs `.lxskin` packages into `files/skins/<id>/` (archive checks, atomic replace), from the ADB inbox, the LAN page, an https URL or the system file picker; removes installed skins |
-| `.../LanInstallServer.kt` | The LAN install page (`http://<tv>:7190/`, PIN), open only while **Install skin** is on screen |
-| `.../RuntimeGuard.kt` | Runtime guard: reloads with the default skin when a skin hangs (ping watchdog), crashes the renderer twice, janks or uses too much memory |
-| `.../ReferenceApps.kt` | The bench's 50 fixed reference apps (`--es bench <skin>`), the same as `mock.js?apps=50` |
-| `app/src/main/assets/web/core/` | Web core: `core.js` (data, input, menus, Settings, level 3 frame host), `nav.js` (D-pad), `skins.js` (loader), `bridge.js` (token), `qr.js` (QR codes for Install skin), `sdk.js` (level 3 SDK, runs in the skin frame), `validate.js`, `lint.js`, `core.css`, `overlay.css` |
-| `app/src/main/assets/web/skins/` | Bundled skins: `default` (level 2 reference), `minimal` (level 0), `marquee` (level 2 showcase), `shelf` (level 3 showcase) |
-| `app/src/main/assets/web/` | Also `index.html`, `mock.js` (desktop only, `?apps=N` reference data), `probe.*` |
-| `tools/lx.mjs` | Skin author tool: `new`, `dev`, `lint`, `bench`, `pack`, `push` ([docs/skin-api.md](docs/skin-api.md)) |
-| `docs/` | [Setup guide](docs/setup-guide.md), [Gotchas](docs/gotchas.md), [Prior art](docs/research-webview-launchers.md), [probe results](docs/probe-2026-11-08.md), [design rules](docs/design-rules.md) |
-| `site/` | GitHub Pages: the short install link (`/apk`) and a start page |
-| `probe-results/` | Measurement runs from the TV (probe results, start-up, frame and app memory data) |
-
-## Remote controls
-- Arrows move, **OK** opens the app, **hold OK** (or Menu) opens the app menu: favourite, reorder, hide, app info.
-- **Back** or **Home** returns to the first favourite. The Settings chip opens launcher settings and the probe.
-
-## Memory while hidden
-| Hidden for | What happens | Return to launcher (measured) |
-|---|---|---|
-| under 60 s | Nothing; WebView timers are paused | 0.1–0.2 s |
-| 60 s | WebView destroyed and its renderer terminated (frees ~50–100 MB) | page in 0.8–1.3 s |
-| 2 min | Process ends (frees the remaining ~70–94 MB) | cold start, page in ~1.5 s |
-
-To tune without rebuilding:
+## Quick start for developers
+Needs Node 20+, JDK 17 and the Android SDK (platform 34). Build and preview:
 ```bash
-adb shell am start -n com.weblauncher.tv/.MainActivity --el releaseDelayMs 60000 --el exitDelayMs 120000
+git clone https://github.com/paulbennet/AndroidTVLauncher && cd AndroidTVLauncher
+npm ci && npx playwright-core install chromium   # tests and lx drive Chrome for Testing
+npm test
+node tools/serve.mjs          # preview with mock apps: http://localhost:5173/?apps=50 (&skin=shelf, &googletv)
+./gradlew assembleRelease     # signed with the debug key unless keystore.properties exists
+adb install -r app/build/outputs/apk/release/app-release.apk
 ```
-`exitDelayMs 0` means never exit; `--ez resetTuning true` restores the defaults.
-Details are in [docs/probe-2026-11-08.md](docs/probe-2026-11-08.md).
-
-## Develop
+Make a skin and try it on the TV:
 ```bash
-npm install && npm test      # validator, lint and zip tests (lx tests use Chrome for Testing)
-node tools/serve.mjs          # UI preview with mock apps at http://localhost:5173 (?skin=<id>, ?apps=50, ?safe=1)
-. scripts/env.sh && ./gradlew assembleDebug
-scripts/install.sh [release]  # build + adb install + start on the TV
+node tools/lx.mjs new my-skin --level 2 --name "My skin"   # --level 3: your own sandboxed page
+node tools/lx.mjs dev my-skin --open                        # live preview on the desktop
+node tools/lx.mjs dev my-skin --tv 192.168.1.20:5555        # live on the TV over ADB
+node tools/lx.mjs bench my-skin --tv 192.168.1.20:5555      # score and tier on the real TV
+node tools/lx.mjs pack my-skin                              # my-skin-0.1.0.lxskin to share
 ```
-Put your tool paths and the TV address in `scripts/env.local.sh` (git-ignored; see `scripts/env.sh`), for example
-`export TV=192.168.1.20:5555`. Debug builds allow `chrome://inspect` on the TV's WebView.
-Tests and `lx` use Chrome for Testing (`npx playwright-core install chromium`, or set `LX_CHROME`).
 
-## Release signing
-Release and debug builds are signed with the project key when `keystore.properties` exists in the project root (git-ignored):
-```
-storeFile=C:/Users/<you>/.weblauncher/release.jks
-storePassword=…
-keyAlias=weblauncher
-keyPassword=…
-```
-Without it they fall back to the Android debug key. **Back up `release.jks` and `keystore.properties`.** An app signed with another key can't update the installed one; the TV must uninstall it first, and that deletes the launcher's data (export it first: `lx settings export --tv`).
-
-## Measuring on the TV
-| Script | Measures |
+## Documentation
+| | |
 |---|---|
-| `scripts/probe.sh` | Cold start, then `probe.html`: web features, codecs and DRM, 9 rendering scenarios; plus meminfo and gfxinfo |
-| `node tools/probe-summary.mjs --since <run>` | Mean ± sd across probe runs (single runs are noisy, so use 3 or more) |
-| `scripts/release-test.sh` | Heavy page, 75 s hidden, return: checks the WebView release |
-| `scripts/return-test.sh [cycles]` | Return timing and hidden memory after 10 s, 75 s and 135 s behind YouTube |
+| [setup-guide.md](docs/setup-guide.md) | Set up on a TV, in plain words |
+| [skin-api.md](docs/skin-api.md) | Making skins: levels, manifest, layout, level 3 SDK, budget, bench, gallery |
+| [development.md](docs/development.md) | Code layout, build, signing, ADB setup, memory, measuring, technical limits |
+| [gotchas.md](docs/gotchas.md) | Google TV, WebView, remote and measuring traps we hit |
+| [design-rules.md](docs/design-rules.md) | What is cheap and what is expensive to draw on a TV |
+| [launcher-v1-plan.md](docs/launcher-v1-plan.md) | Design, decisions, milestones and progress |
+| [research-webview-launchers.md](docs/research-webview-launchers.md) | Prior art and the targets that came from it |
 
-Targets come from [docs/research-webview-launchers.md](docs/research-webview-launchers.md): under 8.5% janky frames in launcher scenes, and under 182 MB in total.
-Current build: focus 0.8% janky, scrolling 0%, idle 140 MiB. Follow [docs/design-rules.md](docs/design-rules.md): animate only transform and opacity, with no blur or animated shadows.
-The scripts send `KEYCODE_WAKEUP`, and the probe keeps the screen on, because ADB activity doesn't stop Google TV's screensaver.
-
-## Toolchain
-JDK 17, Android SDK (platform 34, build-tools 34), Gradle 8.7 wrapper, AGP 8.5.2, Kotlin 1.9.24, Node 20+.
-CI (`.github/workflows/ci.yml`) runs the tests and both builds; pushing a `v*` tag runs `release.yml`, which signs
-the APK with the project key from repository secrets and attaches it to a GitHub release.
-
-## Known limits
-- Google TV's own home (`launcherx`) still owns the Home button and the boot. **Launcher settings → Open at TV start** (on by default) opens this launcher on top after every boot, once you allow it (M4):
-  `adb shell appops set com.weblauncher.tv SYSTEM_ALERT_WINDOW allow`. For Home presses use Button Mapper (Home → this app).
-- Boot opens Google TV home first, and `BOOT_COMPLETED` comes about 26 s later on the VU31. A wake from standby sends no broadcast at all. **Web Launcher home** (an accessibility service, `HomeWatchService`) opens this launcher about 1 s after Google TV home comes to the front. It gets only window-state events from `launcherx` and cannot read screen content. Turn it on in TV Settings → Accessibility, or over ADB (keep any services already listed, joined with `:`):
-  `adb shell settings get secure enabled_accessibility_services` then
-  `adb shell settings put secure enabled_accessibility_services <existing>:com.weblauncher.tv/.HomeWatchService`
-  A force-stop of the app turns this service off again (Android's rule); an app update keeps it.
-- Old TVs whose WebView gets no updates (the Android TV 12 emulator ships Chromium 91): `@layer` needs 99, so the launcher drops the layers there (R24). Skins still apply, but a more specific core selector can win over a skin rule. About in Launcher settings shows the WebView version.
-- The web layer gets Widevine L3 only (`SW_SECURE_CRYPTO`), so DRM video stays in native apps.
-
-## Licence
-MIT, see [LICENSE](LICENSE). Contributions: issues only ([CONTRIBUTING.md](CONTRIBUTING.md)). Third-party parts: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Security: [SECURITY.md](SECURITY.md).
+## Contributing
+Issues only: bug reports, ideas and skin questions are welcome ([CONTRIBUTING.md](CONTRIBUTING.md)). Pull requests are
+off. Licence: MIT ([LICENSE](LICENSE)); third-party parts: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
