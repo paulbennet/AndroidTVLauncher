@@ -4,7 +4,7 @@ description: Set up, use, develop, troubleshoot and make skins for Web TV Launch
 license: MIT
 compatibility: Works in any agent that reads SKILL.md. TV tasks need the TV plus, for engineers, adb over the network; repo and skin tasks need git, Node 20+ and (for APK builds) JDK 17 and the Android SDK.
 metadata:
-  version: "1.1.0"
+  version: "1.1.1"
   repository: https://github.com/paulbennet/AndroidTVLauncher
 ---
 

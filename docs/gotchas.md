@@ -94,6 +94,9 @@ Android 14) and the Android TV 12 emulator; other TVs may differ.
   doesn't end up with the focus. On Windows and in Android WebView the steal happens and the guard takes it back.
 - Menus replace each other: end the previous screen first (`endMenu()`), or its `onClose` runs late.
 - Line endings are LF. Some Windows tools write CRLF.
+- `gh skill install` (no version) reads the **newest release tag**, not `main`: after a skill change, cut a release
+  (push a `v*` tag; `release.yml` also builds the APK). Don't use `gh skill publish` to tag: it makes its own release,
+  which has no APK, and the short install link needs one in the newest release.
 
 ## Signing
 - **Back up the release key and `keystore.properties`.** An APK signed with another key can't update the installed
