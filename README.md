@@ -5,17 +5,18 @@ An Android TV home screen whose UI is plain HTML/JS/CSS, hosted by a small Kotli
 linted and measured against a performance budget. Skin authors: [docs/skin-api.md](docs/skin-api.md).
 Design, decisions and progress: [docs/launcher-v1-plan.md](docs/launcher-v1-plan.md).
 
-**Version 1.0.2.** Built and measured on a Sony Bravia VU31 (Google TV, Android 14, ARMv7, 2 GB RAM, Android System
+**Version 1.1.0.** Built and measured on a Sony Bravia VU31 (Google TV, Android 14, ARMv7, 2 GB RAM, Android System
 WebView 156); also checked on the Android TV 12 emulator. Needs Android 7+ (minSdk 24).
 
 ## Install
-1. Download the APK from [Releases](../../releases) and install it: `adb install web-launcher-<version>.apk`.
-2. Google TV keeps its own home screen. To open Web Launcher instead, give it these once (only you can grant them):
-   - Open at TV start: `adb shell appops set com.weblauncher.tv SYSTEM_ALERT_WINDOW allow`
-   - Replace Google TV home after boot and wake: turn on **Web Launcher home** in TV Settings → Accessibility
-     (details under "Known limits").
-   - The Home button: map it to Web Launcher with an app such as Button Mapper.
-3. Skins: **Launcher settings → Skin**, or install your own (**Install skin**: LAN page, URL, QR code, ADB).
+**On the TV, no computer needed: [Set up on your TV](docs/setup-guide.md).** In short: install **Downloader** from
+the Play Store, open `paulbennet.github.io/AndroidTVLauncher/apk` in it, install, open Web Launcher, and follow
+**Set up this TV** (one switch in TV Settings → Accessibility).
+
+With ADB: `adb install web-launcher.apk` from [Releases](../../releases), then the same **Set up this TV** screen.
+The two TV settings can also be set over ADB:
+`adb shell appops set com.weblauncher.tv SYSTEM_ALERT_WINDOW allow` (optional) and the accessibility command under
+"Known limits".
 
 ## Layout
 | Path | What |
@@ -34,7 +35,8 @@ WebView 156); also checked on the Android TV 12 emulator. Needs Android 7+ (minS
 | `app/src/main/assets/web/skins/` | Bundled skins: `default` (level 2 reference), `minimal` (level 0), `marquee` (level 2 showcase), `shelf` (level 3 showcase) |
 | `app/src/main/assets/web/` | Also `index.html`, `mock.js` (desktop only, `?apps=N` reference data), `probe.*` |
 | `tools/lx.mjs` | Skin author tool: `new`, `dev`, `lint`, `bench`, `pack`, `push` ([docs/skin-api.md](docs/skin-api.md)) |
-| `docs/` | [Gotchas](docs/gotchas.md), [Prior art](docs/research-webview-launchers.md), [probe results](docs/probe-2026-11-08.md), [design rules](docs/design-rules.md) |
+| `docs/` | [Setup guide](docs/setup-guide.md), [Gotchas](docs/gotchas.md), [Prior art](docs/research-webview-launchers.md), [probe results](docs/probe-2026-11-08.md), [design rules](docs/design-rules.md) |
+| `site/` | GitHub Pages: the short install link (`/apk`) and a start page |
 | `probe-results/` | Measurement runs from the TV (probe results, start-up, frame and app memory data) |
 
 ## Remote controls

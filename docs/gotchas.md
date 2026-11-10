@@ -4,6 +4,10 @@ Things that cost time while building and measuring this launcher. Most were foun
 Android 14) and the Android TV 12 emulator; other TVs may differ.
 
 ## Google TV: boot, wake and the Home button
+- **Settings screens can exist without a menu entry.** On the VU31, "Display over other apps" has no menu path, but
+  `Settings.ACTION_MANAGE_OVERLAY_PERMISSION` opens it. The Setup screen opens these screens directly.
+- **Package visibility (Android 11+):** to check whether Google TV home is installed, the app needs
+  `<queries><package android:name="com.google.android.apps.tv.launcherx"/></queries>`; without it the check says no.
 - **Google TV home (`com.google.android.apps.tv.launcherx`) always wins.** It has HOME priority 2. The Home role and
   `cmd package set-home-activity` are ignored, and disabling it can bring up a recovery screen instead. So this app
   opens itself on top: `BootReceiver` after boot, `HomeWatchService` (accessibility) when Google TV home comes to the
@@ -83,6 +87,8 @@ Android 14) and the Android TV 12 emulator; other TVs may differ.
 - `npm test` needs the glob `tools/test/*.test.mjs`; a directory argument fails on Node 24.
 - Tests and `lx` need Chrome for Testing (`npx playwright-core install chromium`, or set `LX_CHROME`).
 - The Skin menu is async: tests must wait for its title before they read the items.
+- Node's `server.close()` waits for keep-alive connections, and a browser page still open on the server can hold one
+  for a long time: the test then times out. The test server calls `closeAllConnections()` too.
 - Headless Chrome on a Linux CI runner doesn't let a sandboxed frame take the focus (`focus()` does nothing), so the
   focus guard's window `blur` never fires there. The `l3-hostile` test accepts that, and checks only that the frame
   doesn't end up with the focus. On Windows and in Android WebView the steal happens and the guard takes it back.

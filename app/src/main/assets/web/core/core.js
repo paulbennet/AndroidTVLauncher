@@ -356,8 +356,12 @@ function settingsMenu() {
     { label: 'Skin', value: safeMode ? `${m.name} (safe mode)` : m.name, keepOpen: true, run: skinsMenu },
     { label: 'Install skin', keepOpen: true, run: installMenu },
   ];
-  const boot = bootState();
-  if (boot) items.push({ label: 'Open at TV start', value: !boot.enabled ? 'Off' : boot.allowed ? 'On' : 'On · needs permission', keepOpen: true, run: bootMenu });
+  const setup = setupState();
+  if (setup && setup.googleTv) items.push({ label: 'Set up this TV', value: setup.homeWatch ? 'Done' : 'Not done', keepOpen: true, run: setupMenu });
+  else {
+    const boot = bootState();
+    if (boot) items.push({ label: 'Open at TV start', value: !boot.enabled ? 'Off' : boot.allowed ? 'On' : 'On · needs permission', keepOpen: true, run: bootMenu });
+  }
   if (m.options.length && !safeMode) items.push({ label: 'Skin options', value: `${m.options.length}`, keepOpen: true, run: optionsMenu });
   items.push(
     { label: 'Android settings', run: () => bridge.openSettings() },
@@ -636,15 +640,75 @@ function bootMenu() {
   const body = document.createElement('div');
   body.className = 'boot';
   const line = (t, cls) => { const p = document.createElement('p'); if (cls) p.className = cls; p.textContent = t; body.append(p); };
-  line('After the TV starts, this launcher opens on top of the Google TV home screen. The Home button still opens Google TV home (use Button Mapper to change it).');
+  line('After the TV starts, this launcher opens on top of the Google TV home screen.');
   if (!b.allowed) {
     line('The TV must allow this launcher to open by itself ("Display over other apps"). From a computer with ADB, run once:');
     line('adb shell appops set com.weblauncher.tv SYSTEM_ALERT_WINDOW allow', 'cmd');
   }
+  const setup = setupState();
   openMenu('Open at TV start', [
     { label: b.enabled ? 'Turn off' : 'Turn on', keepOpen: true, run: () => { bridge.setBootOpen(!b.enabled); bootMenu(); } },
-    { label: 'Back', keepOpen: true, run: settingsMenu },
+    { label: 'Back', keepOpen: true, run: setup && setup.googleTv ? setupMenu : settingsMenu },
   ], { body });
+}
+
+// ---------------------------------------------------------------- Set up this TV (session 18, decision D10)
+// Google TV keeps its own home screen, so a new user must turn on two things in TV Settings. This screen says what
+// is still off and opens the right Settings screen; no computer or ADB needed. It opens once by itself.
+let setupShown = false; // the Setup screen is on screen: refresh it when the user comes back from TV Settings
+
+function setupState() {
+  if (typeof bridge.getSetup !== 'function') return null;
+  try { return JSON.parse(bridge.getSetup()); } catch (e) { return null; }
+}
+
+function openSetupScreen(which, hint) {
+  if (bridge.openSetupScreen(which)) toast(hint, 8000);
+  else toast('This TV has no such Settings screen.', 5000);
+}
+
+function setupMenu() {
+  const s = setupState();
+  if (!s) return;
+  const body = document.createElement('div');
+  body.className = 'boot';
+  const line = t => { const p = document.createElement('p'); p.textContent = t; body.append(p); };
+  line(s.homeWatch
+    ? 'Done: Web Launcher opens instead of Google TV home, after the TV starts or wakes and when you press Home.'
+    : 'Google TV keeps its own home screen. Turn on "Web Launcher home" once, and Web Launcher opens instead: after the TV starts or wakes, and when you press Home.');
+  line('It only sees when Google TV home opens. It can\'t read the screen or what you type.');
+  const items = [
+    {
+      label: '1. Open instead of Google TV home', value: s.homeWatch ? 'On' : 'Off · open Settings', keepOpen: true,
+      run: () => openSetupScreen('accessibility', 'Go down to Services → Web Launcher home → turn it on. Then press Back.'),
+    },
+    {
+      label: '2. Faster start after the TV starts', value: s.overlay ? 'On' : 'Optional · open Settings', keepOpen: true,
+      run: () => openSetupScreen('overlay', 'Pick Web Launcher → allow "Display over other apps". Then press Back.'),
+    },
+    { label: 'Open at TV start', value: s.bootOpen ? 'On' : 'Off', keepOpen: true, run: bootMenu },
+    { label: 'The Home button shows Google TV home for a moment', value: 'Tip', keepOpen: true, run: homeButtonTip },
+    { label: s.homeWatch ? 'Close' : 'Later', run: () => {} },
+  ];
+  openMenu('Set up this TV', items, { body, onClose: () => { setupShown = false; store.set('setupSeen', true); } });
+  setupShown = true; // after openMenu: it ends the previous screen, which may be this one
+}
+
+function homeButtonTip() {
+  const body = document.createElement('div');
+  body.className = 'boot';
+  const p = document.createElement('p');
+  p.textContent = 'With "Web Launcher home" on, Home first shows Google TV home, then Web Launcher about a second later. '
+    + 'To skip that, install a button-mapping app (for example Button Mapper from the Play Store) and set Home → Web Launcher.';
+  body.append(p);
+  openMenu('Home button', [{ label: 'Back', keepOpen: true, run: setupMenu }], { body });
+}
+
+/** Opens Set up this TV once, on a Google TV where the main step is still off. */
+function maybeFirstRunSetup() {
+  if (benchMode || safeMode || store.get('setupSeen', false) || !overlay.menu.hidden) return;
+  const s = setupState();
+  if (s && s.googleTv && !s.homeWatch) setupMenu();
 }
 
 async function removeSkinMenu() {
@@ -971,6 +1035,7 @@ window.launcher = {
     if (!ready) return;
     updateMemory(); tickClock();
     if (recentDirty) { recentDirty = false; render(); }
+    if (setupShown && !overlay.menu.hidden) setupMenu(); // back from TV Settings: show what changed
     framePost({ type: 'resume' });
   },
   onAppsChanged() { if (ready) { loadApps(); render(); } },
@@ -1093,6 +1158,7 @@ async function boot() {
   else if (guardReason && (!guardCulprit || guardCulprit === DEFAULT_SKIN)) toast(`The launcher was restarted: ${GUARD_REASONS[guardReason]}.`, 6000);
   else if (guardReason) toast(`Skin "${guardCulprit}" was turned off: ${GUARD_REASONS[guardReason]}. Using the default skin.`, 6000);
   else if (fallbackReason) toast(`Skin "${wanted}" failed to load; using the default skin.`, 5000);
+  setTimeout(maybeFirstRunSetup, 1500); // after the first frames, so the start-up timing is not affected
 
   // Startup timing for scripts/probe.sh: process start / activity create -> first rendered frame.
   requestAnimationFrame(() => requestAnimationFrame(() => {

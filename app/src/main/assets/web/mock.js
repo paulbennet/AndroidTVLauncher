@@ -69,6 +69,9 @@
     // Open at TV start (M4): never allowed on the desktop.
     getBootOpen: _t => JSON.stringify({ enabled: window.__bootOpen !== false, allowed: false }),
     setBootOpen: (_t, on) => { window.__bootOpen = on; },
+    // Set up this TV: `?googletv` acts like a Google TV with nothing turned on; tests change it with window.__setup.
+    getSetup: _t => JSON.stringify({ googleTv: /[?&]googletv\b/.test(location.search), homeWatch: false, overlay: false, bootOpen: window.__bootOpen !== false, ...(window.__setup || {}) }),
+    openSetupScreen: (_t, which) => { (window.__setupOpened ||= []).push(which); return true; },
     // Install (M2.3): desktop preview only shows the screen; installs need the TV.
     installOpen: _t => { window.__installOpen = true; return JSON.stringify({ lan: { url: 'http://192.168.1.20:7190/', pin: '123456' }, picker: false, inbox: null, dev: !!window.__devMode }); },
     installClose: _t => { window.__installOpen = false; },

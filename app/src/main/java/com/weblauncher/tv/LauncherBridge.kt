@@ -188,6 +188,43 @@ class LauncherBridge(
     @JavascriptInterface
     fun setBootOpen(t: String, on: Boolean) { if (ok(t)) BootReceiver.setEnabled(activity, on) }
 
+    // ------------------------------------------------------------ Set up this TV (session 18, decision D10)
+
+    /**
+     * { googleTv, homeWatch, overlay, bootOpen }: what a non-engineer still has to turn on. googleTv: Google TV's
+     * own home is installed (then this launcher can't be the Home app, and the setup steps matter).
+     */
+    @JavascriptInterface
+    fun getSetup(t: String): String {
+        if (!ok(t)) return "{}"
+        val enabled = Settings.Secure.getString(activity.contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES).orEmpty()
+        val me = "${activity.packageName}/"
+        val googleTv = runCatching { activity.packageManager.getPackageInfo(HomeWatchService.LAUNCHERX, 0) }.isSuccess
+        return JSONObject()
+            .put("googleTv", googleTv)
+            .put("homeWatch", enabled.split(':').any { it.startsWith(me) && it.endsWith("HomeWatchService") })
+            .put("overlay", BootReceiver.allowed(activity))
+            .put("bootOpen", BootReceiver.enabled(activity))
+            .toString()
+    }
+
+    /** Opens a TV Settings screen for a setup step: "accessibility" or "overlay". False if the TV has none. */
+    @JavascriptInterface
+    fun openSetupScreen(t: String, which: String): Boolean {
+        if (!ok(t)) return false
+        val pm = activity.packageManager
+        val candidates = when (which) {
+            "accessibility" -> listOf(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+            "overlay" -> listOf(
+                Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:${activity.packageName}")),
+                Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION),
+            )
+            else -> emptyList()
+        }
+        val intent = candidates.firstOrNull { it.resolveActivity(pm) != null } ?: return false
+        return start(intent)
+    }
+
     // ------------------------------------------------------------ TV inputs (M3.1)
 
     /** [{ id, label, kind: hdmi|av|tuner|other, connected }]; empty on devices without TV inputs. */

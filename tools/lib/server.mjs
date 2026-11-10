@@ -161,7 +161,14 @@ export function startServer({ port = 0, skinFolders = [], skins = [], liveReload
     ok({
       server, url, skinDirs,
       reload() { for (const c of clients) c.write('data: reload\n\n'); },
-      close() { for (const c of clients) c.end(); return new Promise(done => server.close(done)); },
+      // server.close() waits for every keep-alive connection, and a browser page still open on this server can
+      // hold one for longer than a test's timeout: drop them.
+      close() {
+        for (const c of clients) c.end();
+        const closed = new Promise(done => server.close(done));
+        server.closeAllConnections?.();
+        return closed;
+      },
     });
   }));
 }

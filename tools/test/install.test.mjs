@@ -192,3 +192,47 @@ test('long press OK opens the app menu and does not launch, also when held keydo
   await page.keyboard.press('Enter'); await page.waitForTimeout(100);
   assert.equal((await recent()).length, 1, 'a short press still launches');
 });
+
+// ---------------------------------------------------------------- Set up this TV (session 18, decision D10)
+test('Set up this TV: opens once on a Google TV, opens TV Settings screens, shows the new state on return', { timeout: 30000 }, async () => {
+  const title = () => page.evaluate(() => { const o = document.querySelector('lx-overlay').shadowRoot; return o.querySelector('.menu')?.hidden === false || !o.querySelector('.menu') ? o.querySelector('.title').textContent : null; });
+  const values = () => page.evaluate(() => [...document.querySelector('lx-overlay').shadowRoot.querySelectorAll('.item')].map(b => b.textContent));
+  const menuHidden = () => page.evaluate(() => document.querySelector('lx-overlay').shadowRoot.querySelector('.menu').hidden);
+  await page.goto(`${srv.url}/?apps=50`);
+  await page.evaluate(() => localStorage.clear());
+
+  // Not a Google TV: no prompt, and Launcher settings keeps "Open at TV start".
+  await page.goto(`${srv.url}/?apps=50`);
+  await page.waitForFunction(() => document.documentElement.dataset.state === 'ready');
+  await page.waitForTimeout(1800);
+  assert.equal(await menuHidden(), true, 'no prompt without Google TV');
+  await page.evaluate(() => window.launcher.onMenu());
+  await activate('Launcher settings');
+  assert.ok((await values()).some(v => v.startsWith('Open at TV start')));
+  await page.evaluate(() => window.launcher.onBack());
+
+  // Google TV, nothing on: the Setup screen opens by itself once.
+  await page.goto(`${srv.url}/?apps=50&googletv`);
+  await page.waitForFunction(() => document.documentElement.dataset.state === 'ready');
+  await page.waitForFunction(() => document.querySelector('lx-overlay').shadowRoot.querySelector('.title').textContent === 'Set up this TV', null, { timeout: 4000 });
+  assert.ok((await values()).some(v => v.includes('Off · open Settings')));
+  await activate('1. Open instead of Google TV home');
+  assert.deepEqual(await page.evaluate(() => window.__setupOpened), ['accessibility']);
+  await page.evaluate(() => { window.__setup = { homeWatch: true }; window.launcher.onResume(); }); // back from TV Settings
+  assert.ok((await values()).some(v => v.startsWith('1. Open instead of Google TV home') && v.endsWith('On')), 'refreshed on return');
+  await activate('2. Faster start after the TV starts');
+  assert.deepEqual(await page.evaluate(() => window.__setupOpened), ['accessibility', 'overlay']);
+  await activate('Close');
+  assert.equal(await menuHidden(), true);
+
+  // Seen once: no prompt on the next start, even with the step off again; Launcher settings still has it.
+  await page.goto(`${srv.url}/?apps=50&googletv`);
+  await page.waitForFunction(() => document.documentElement.dataset.state === 'ready');
+  await page.waitForTimeout(1800);
+  assert.equal(await menuHidden(), true, 'shown only once');
+  await page.evaluate(() => window.launcher.onMenu());
+  await activate('Launcher settings');
+  assert.ok((await values()).some(v => v.startsWith('Set up this TV') && v.endsWith('Not done')));
+  await activate('Set up this TV');
+  assert.equal(await title(), 'Set up this TV');
+});
