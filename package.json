@@ -1,0 +1,19 @@
+{
+  "name": "web-tv-launcher",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "preview": "node tools/serve.mjs",
+    "test": "node --test \"tools/test/*.test.mjs\"",
+    "lx": "node tools/lx.mjs"
+  },
+  "devDependencies": {
+    "jsqr": "^1.4.0",
+    "playwright-core": "^1.65.0",
+    "typescript": "^5.6.3"
+  },
+  "version": "0.1.0",
+  "bin": {
+    "lx": "tools/lx.mjs"
+  }
+}

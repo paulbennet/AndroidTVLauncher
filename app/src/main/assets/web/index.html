@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Plan revision R5: nothing loads from outside this origin; no inline scripts. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; font-src 'self'; frame-src https://skin.local; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Web Launcher</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/core/core.css">
+  <!-- Fetch the whole module graph in parallel (otherwise each import is one more round trip on the TV). -->
+  <link rel="modulepreload" href="/core/core.js">
+  <link rel="modulepreload" href="/core/nav.js">
+  <link rel="modulepreload" href="/core/skins.js">
+  <link rel="modulepreload" href="/core/validate.js">
+  <!-- async: run as soon as fetched; a deferred module waits for the parser (domInteractive ~1.25 s on the VU31).
+       blocking="render" (only honoured in <head>): no paint before the core has rendered. An empty first paint
+       costs ~500 ms on the VU31, and boot renders without yielding (skin files come from a sync bridge call). -->
+  <script type="module" async blocking="render" src="/core/core.js"></script>
+</head>
+<body></body>
+</html>

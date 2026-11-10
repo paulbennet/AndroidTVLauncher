@@ -1,0 +1,16 @@
+{
+  "id": "default",
+  "name": "Default",
+  "version": "1.0.0",
+  "apiVersion": 1,
+  "level": 2,
+  "author": "Web Launcher",
+  "description": "The reference skin: clock, favourites row and an app grid. Scores are relative to this skin.",
+  "layout": "layout.json",
+  "options": [
+    { "id": "clockDate", "type": "toggle", "label": "Show date", "default": true },
+    { "id": "recent", "type": "toggle", "label": "Show recent apps", "default": true },
+    { "id": "inputs", "type": "toggle", "label": "Show TV inputs (HDMI)", "default": true }
+  ],
+  "styles": ["skin.css"]
+}

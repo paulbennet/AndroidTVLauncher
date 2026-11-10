@@ -1,0 +1,18 @@
+{
+  "id": "l3-busy",
+  "name": "L3 busy (guard test)",
+  "version": "0.1.0",
+  "apiVersion": 1,
+  "level": 3,
+  "author": "Web Launcher tests",
+  "description": "Blocks the renderer 4 s after start; the runtime guard must reload the default skin.",
+  "entry": "skin.html",
+  "options": [
+    {
+      "id": "clockDate",
+      "type": "toggle",
+      "label": "Show date",
+      "default": true
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+Starting: Intent { cmp=com.weblauncher.tv/.MainActivity }
+Status: ok
+LaunchState: COLD
+Activity: com.weblauncher.tv/.MainActivity
+TotalTime: 1245
+WaitTime: 1260
+Complete

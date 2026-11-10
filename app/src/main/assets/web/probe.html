@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Launcher Probe</title>
+  <link rel="stylesheet" href="probe.css">
+</head>
+<body>
+  <header class="head">
+    <div>
+      <h1>WebView performance probe</h1>
+      <div id="status" class="status">Starting…</div>
+    </div>
+    <div id="verdict" class="verdict"></div>
+  </header>
+
+  <main id="results" class="results">
+    <section><h2>Scenarios <span class="hint">frame time from native FrameMetrics when available, else requestAnimationFrame</span></h2>
+      <table><thead><tr><th>Scenario</th><th>Frames</th><th>Median</th><th>p95</th><th>Janky</th><th>&gt;16.6 ms</th><th>GPU med</th><th>rAF fps</th><th>Free RAM Δ</th><th>Target</th></tr></thead>
+      <tbody id="t-scen"></tbody></table></section>
+    <div class="cols">
+      <section><h2>Device</h2><table><tbody id="t-env"></tbody></table></section>
+      <section><h2>Media &amp; DRM</h2><table><tbody id="t-media"></tbody></table></section>
+      <section><h2>Web features</h2><table><tbody id="t-feat"></tbody></table></section>
+    </div>
+    <p class="foot">Back returns to the launcher · arrows scroll · results are also written to logcat (tag WebLauncher, <code>PROBE_RESULT</code>).</p>
+  </main>
+
+  <div id="stage" class="stage" hidden></div>
+
+  <script src="mock.js"></script>
+  <script src="probe.js"></script>
+</body>
+</html>

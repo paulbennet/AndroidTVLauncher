@@ -1,0 +1,9 @@
+{
+  "id": "l3-hostile",
+  "name": "L3 hostile (sandbox test)",
+  "version": "0.1.0",
+  "apiVersion": 1,
+  "level": 3,
+  "author": "Web Launcher tests",
+  "description": "Tries to escape the sandbox: parent DOM, storage, network, focus, launching apps it was not given."
+}

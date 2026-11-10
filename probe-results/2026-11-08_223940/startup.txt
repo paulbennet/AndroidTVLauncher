@@ -1,0 +1,1 @@
+STARTUP {"processToFirstFrameMs":1443,"activityToFirstFrameMs":1309,"apps":21}

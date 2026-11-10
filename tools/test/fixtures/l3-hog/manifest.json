@@ -1,0 +1,18 @@
+{
+  "id": "l3-hog",
+  "name": "L3 memory hog (guard test)",
+  "version": "0.1.0",
+  "apiVersion": 1,
+  "level": 3,
+  "author": "Web Launcher tests",
+  "description": "Holds 160 MB 3 s after start; the runtime guard must reload the default skin.",
+  "entry": "skin.html",
+  "options": [
+    {
+      "id": "clockDate",
+      "type": "toggle",
+      "label": "Show date",
+      "default": true
+    }
+  ]
+}

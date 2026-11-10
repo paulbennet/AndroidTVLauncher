@@ -1,0 +1,13 @@
+{
+  "id": "l3-basic",
+  "name": "L3 basic (default look)",
+  "version": "0.1.0",
+  "apiVersion": 1,
+  "level": 3,
+  "author": "Web Launcher tests",
+  "description": "Level 3 copy of the default skin's look, to measure what the sandboxed iframe costs.",
+  "entry": "skin.html",
+  "options": [
+    { "id": "clockDate", "type": "toggle", "label": "Show date", "default": true }
+  ]
+}

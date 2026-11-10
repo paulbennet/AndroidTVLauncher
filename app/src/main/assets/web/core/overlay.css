@@ -1,0 +1,55 @@
+/* Core-owned UI (menus, Settings, toast) inside a shadow root: skin CSS cannot reach it (plan revision R1).
+   Sizes use --u (1/96 of the viewport width) instead of rem, because a skin may change the root font size. */
+.root {
+  --u: calc(100vw / 96);
+  --accent: #f2a93b;
+  position: fixed; inset: 0; pointer-events: none;
+  font-family: "Roboto", "Segoe UI", system-ui, sans-serif; color: #ede7f6;
+  -webkit-font-smoothing: antialiased;
+}
+
+.menu {
+  position: fixed; inset: 0; background: rgba(5, 6, 14, 0.7);
+  display: flex; align-items: center; justify-content: center; pointer-events: auto;
+}
+.menu[hidden] { display: none; }
+.card {
+  min-width: calc(30 * var(--u)); max-width: calc(60 * var(--u)); max-height: 90vh; overflow: hidden;
+  background: #1f1d38; border-radius: var(--u); padding: calc(1.6 * var(--u));
+  box-shadow: 0 calc(1.5 * var(--u)) calc(4 * var(--u)) rgba(0, 0, 0, 0.6);
+}
+.title { font-size: calc(1.5 * var(--u)); font-weight: 500; margin-bottom: var(--u); }
+.items { display: flex; flex-direction: column; gap: calc(0.4 * var(--u)); max-height: 75vh; overflow-y: auto; scrollbar-width: none; }
+.item {
+  display: flex; justify-content: space-between; gap: calc(2 * var(--u));
+  font: inherit; font-size: calc(1.2 * var(--u)); color: inherit; text-align: left;
+  padding: calc(0.8 * var(--u)) calc(1.1 * var(--u)); border: 0;
+  border-radius: calc(0.5 * var(--u)); background: transparent; outline: none; cursor: pointer;
+}
+.item .value { opacity: 0.7; }
+.item.current > :first-child::before { content: "● "; color: var(--accent); }
+.item:focus { background: var(--accent); color: #1a1834; }
+.item:focus.current > :first-child::before { color: #1a1834; }
+.item.info { cursor: default; opacity: 0.75; }
+
+.body { margin-bottom: var(--u); font-size: calc(1.1 * var(--u)); }
+.body[hidden] { display: none; }
+.install { display: flex; gap: calc(1.6 * var(--u)); align-items: center; }
+.install .qr { width: calc(13 * var(--u)); height: calc(13 * var(--u)); flex: none; border-radius: calc(0.4 * var(--u)); }
+.install p { margin: 0 0 calc(0.4 * var(--u)); }
+.install .url { font-size: calc(1.4 * var(--u)); font-weight: 500; color: var(--accent); }
+.install .pin { font-size: calc(2 * var(--u)); letter-spacing: 0.15em; margin-left: calc(0.6 * var(--u)); }
+
+.gallery { display: flex; gap: calc(1.6 * var(--u)); align-items: flex-start; max-width: calc(56 * var(--u)); }
+.gallery .preview { width: calc(24 * var(--u)); aspect-ratio: 16 / 9; object-fit: cover; flex: none; border-radius: calc(0.4 * var(--u)); background: #2f2c52; }
+.gallery .preview[hidden] { display: none; }
+.gallery p, .boot p { margin: 0 0 calc(0.5 * var(--u)); }
+.boot { max-width: calc(50 * var(--u)); }
+.boot .cmd { font-family: ui-monospace, "Roboto Mono", monospace; font-size: calc(1 * var(--u)); color: var(--accent); overflow-wrap: anywhere; }
+
+.toast {
+  position: fixed; right: calc(4.5 * var(--u)); bottom: calc(1.6 * var(--u));
+  font-size: calc(1.15 * var(--u)); padding: calc(0.7 * var(--u)) calc(1.2 * var(--u));
+  border-radius: calc(0.5 * var(--u)); background: #2f2c52; max-width: calc(50 * var(--u));
+}
+.toast[hidden] { display: none; }

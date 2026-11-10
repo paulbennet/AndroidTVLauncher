@@ -1,0 +1,23 @@
+.gradle/
+build/
+app/build/
+local.properties
+*.iml
+.idea/
+.kotlin/
+.playwright-cli/
+node_modules/
+
+# Release signing (never commit): see README "Release signing"
+keystore.properties
+*.jks
+*.keystore
+
+# Release builds kept locally (not in git)
+dist/
+
+# Local private skins (never commit or publish)
+private/
+
+# This PC only: tool paths and the TV address
+scripts/env.local.sh

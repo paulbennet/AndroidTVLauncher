@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- HomeWatchService: only window-state events from Google TV home, no window content, no key events. -->
+<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accessibilityEventTypes="typeWindowStateChanged"
+    android:accessibilityFeedbackType="feedbackGeneric"
+    android:canRetrieveWindowContent="false"
+    android:description="@string/home_watch_description"
+    android:notificationTimeout="0"
+    android:packageNames="com.google.android.apps.tv.launcherx" />

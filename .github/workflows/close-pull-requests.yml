@@ -1,0 +1,18 @@
+name: Close pull requests
+# This project takes contributions as issues only (CONTRIBUTING.md).
+# pull_request_target runs in this repo's context, but this job never checks out or runs the PR's code.
+on:
+  pull_request_target:
+    types: [opened, reopened]
+permissions:
+  pull-requests: write
+jobs:
+  close:
+    if: github.event.pull_request.user.login != github.repository_owner
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.html_url }}
+        run: |
+          gh pr close "$PR" --comment "Thanks! This project takes contributions as issues only, so pull requests are closed automatically. Please open an issue that describes the change (see CONTRIBUTING.md)."

@@ -1,0 +1,30 @@
+{
+  "type": "stack",
+  "children": [
+    { "type": "stack", "id": "top", "dir": "row", "children": [
+      { "type": "hero", "id": "stage" },
+      { "type": "spacer" },
+      { "type": "stack", "id": "side", "children": [
+        { "type": "clock" },
+        { "type": "stack", "id": "chips", "dir": "row", "children": [
+          { "type": "memory" },
+          { "type": "settings", "label": "Settings" }
+        ]}
+      ]}
+    ]},
+    { "type": "scroll", "id": "shelves", "children": [
+      { "type": "section", "title": "Favourites", "class": "shelf", "children": [
+        { "type": "row", "source": "favourites", "empty": "Hold OK on any app to add it here." }
+      ]},
+      { "type": "section", "title": "Recent", "class": "shelf recent", "children": [
+        { "type": "row", "source": "recent" }
+      ]},
+      { "type": "section", "title": "Inputs", "class": "shelf inputs", "children": [
+        { "type": "row", "source": "inputs" }
+      ]},
+      { "type": "section", "title": "All apps", "class": "shelf", "children": [
+        { "type": "grid", "source": "apps" }
+      ]}
+    ]}
+  ]
+}

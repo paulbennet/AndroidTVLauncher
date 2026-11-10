@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="skin.css">
+  <script type="module" src="skin.js"></script>
+  <script src="trouble.js"></script>
+</head>
+<body>
+  <div class="bg"></div>
+  <header id="topbar">
+    <div class="clock"><div class="time">--:--</div><div class="date"></div></div>
+    <div class="spacer"></div>
+    <div class="pill" data-nav data-action="settings">Settings</div>
+  </header>
+  <main class="scroll" data-scroll>
+    <section><h2>Favourites</h2><div class="row" data-list="favourites"></div></section>
+    <section><h2>All apps <span class="count"></span></h2><div class="grid" data-list="apps"></div></section>
+  </main>
+  <div class="caption"></div>
+</body>
+</html>

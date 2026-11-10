@@ -1,0 +1,5 @@
+/* Lint fixture: every rule below breaks a budget rule. Used by tools/test/lx.test.mjs. */
+lx-section { backdrop-filter: blur(10px); transition: all 200ms; }
+lx-tile { will-change: transform; transition: box-shadow 200ms; background-image: url("https://cdn.example/x.png"); }
+@keyframes pulse { from { box-shadow: 0 0 0 red; } to { box-shadow: 0 0 20px red; } }
+lx-clock { animation: pulse 1s infinite; }

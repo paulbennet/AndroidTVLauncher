@@ -1,0 +1,26 @@
+{
+  "type": "stack",
+  "children": [
+    { "type": "stack", "id": "topbar", "dir": "row", "children": [
+      { "type": "clock" },
+      { "type": "spacer" },
+      { "type": "memory" },
+      { "type": "settings", "label": "Settings" }
+    ]},
+    { "type": "scroll", "children": [
+      { "type": "section", "title": "Favourites", "children": [
+        { "type": "row", "source": "favourites" }
+      ]},
+      { "type": "section", "title": "Recent", "class": "recent", "children": [
+        { "type": "row", "source": "recent" }
+      ]},
+      { "type": "section", "title": "Inputs", "class": "inputs", "children": [
+        { "type": "row", "source": "inputs" }
+      ]},
+      { "type": "section", "title": "All apps", "children": [
+        { "type": "grid", "source": "apps" }
+      ]}
+    ]},
+    { "type": "caption" }
+  ]
+}

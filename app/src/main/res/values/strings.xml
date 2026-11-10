@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Web Launcher</string>
+    <string name="home_watch_label">Web Launcher home</string>
+    <string name="home_watch_description">Opens Web Launcher when Google TV home appears, for example after the TV starts or wakes. It sees only which Google TV home screen opens. It cannot read what is on the screen.</string>
+</resources>

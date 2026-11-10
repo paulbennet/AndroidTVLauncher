@@ -1,0 +1,49 @@
+Applications Memory Usage (in Kilobytes):
+Uptime: 12171342 Realtime: 38291264
+
+** MEMINFO in pid 2766 [com.weblauncher.tv] **
+                   Pss  Private  Private  SwapPss      Rss     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty    Total     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------   ------
+  Native Heap    20180    20144        0        5    20516    33784    18716     4864
+  Dalvik Heap     4326     4280        0       32     4584     3244     1622     1622
+ Dalvik Other      932      932        0        2      960                           
+        Stack     1136     1136        0        0     1136                           
+       Ashmem      393      188        0        0      924                           
+    Other dev      104       40       56        0      336                           
+     .so mmap    19364      672    14176        7    40296                           
+    .jar mmap     4707        0     1568        0    28456                           
+    .apk mmap    36795      292    20352        0    53884                           
+    .dex mmap      309       12      100        0     1032                           
+    .oat mmap     1592        0      620        0    10624                           
+    .art mmap     2312     1564        4      215    12576                           
+   Other mmap     1832      296      632        0     3404                           
+      Unknown     6071     6060        0        0     6212                           
+        TOTAL   100314    35616    37508      261   184940    37028    20338     6486
+ 
+ App Summary
+                       Pss(KB)                        Rss(KB)
+                        ------                         ------
+           Java Heap:     5848                          17160
+         Native Heap:    20144                          20516
+                Code:    37808                         134308
+               Stack:     1136                           1136
+            Graphics:        0                              0
+       Private Other:     8188
+              System:    27190
+             Unknown:                                   11820
+ 
+           TOTAL PSS:   100314            TOTAL RSS:   184940       TOTAL SWAP PSS:      261
+ 
+ Objects
+               Views:        5         ViewRootImpl:        1
+         AppContexts:       10           Activities:        1
+              Assets:       78        AssetManagers:        0
+       Local Binders:       62        Proxy Binders:       65
+       Parcel memory:       19         Parcel count:       58
+    Death Recipients:        6             WebViews:        1
+ 
+ SQL
+         MEMORY_USED:        0
+  PAGECACHE_OVERFLOW:        0          MALLOC_SIZE:        0
+ 

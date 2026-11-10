@@ -1,0 +1,7 @@
+/* The default look is the core's own (core/core.css); this file only wires the skin options. */
+html[data-opt-clock-date="off"] lx-clock .lx-date { display: none; }
+html[data-opt-inputs="off"] lx-section.inputs { display: none; }
+html[data-opt-recent="off"] lx-section.recent { display: none; }
+/* Inputs: smaller tiles than apps (they only hold an icon and a name). */
+lx-section.inputs lx-row > lx-tile { flex-basis: 14rem; aspect-ratio: 2 / 1; }
+lx-section.recent lx-row > lx-tile { flex-basis: 16rem; }

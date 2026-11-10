@@ -1,0 +1,29 @@
+name: CI
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      # Tests drive Chrome for Testing (tools/lib/browser.mjs finds Playwright's chromium-* download).
+      - run: npx playwright-core install --with-deps chromium
+      - run: npm test
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 17, cache: gradle }
+      # No keystore.properties here, so both builds are signed with the Android debug key.
+      - run: ./gradlew --no-daemon assembleDebug assembleRelease testReleaseUnitTest
+      - uses: actions/upload-artifact@v4
+        with:
+          name: apk-unsigned-release
+          path: app/build/outputs/apk/release/*.apk

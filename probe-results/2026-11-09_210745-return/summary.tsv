@@ -1,0 +1,4 @@
+cycle	hidden_s	launch	displayed_ms	webview_to_page_ms	process_to_page_ms	launcher_hidden_mb	webview_renderers_hidden_mb	other_app_mb
+1	10	HOT	236	already loaded	-	73	50	259
+1	75	HOT	181	1426	-	82	0	259
+1	135	COLD	1027	1242	1646	0	0	305

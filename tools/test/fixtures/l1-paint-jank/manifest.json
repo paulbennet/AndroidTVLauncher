@@ -1,0 +1,10 @@
+{
+  "id": "l1-paint-jank",
+  "name": "L1 paint jank (guard test)",
+  "version": "0.1.0",
+  "apiVersion": 1,
+  "level": 1,
+  "author": "Web Launcher tests",
+  "description": "Animates a large box-shadow after every focus move (slow raster, not slow script). The FrameMetrics check of the runtime guard must turn it off. It fails lint on purpose: use lx push, not lx install.",
+  "styles": ["skin.css"]
+}

@@ -1,0 +1,35 @@
+{
+  "id": "marquee",
+  "name": "Marquee (showcase L2)",
+  "version": "1.0.0",
+  "apiVersion": 1,
+  "level": 2,
+  "author": "Web Launcher",
+  "description": "A level 2 showcase: the focused app as a large marquee above the rows, a side column with the clock, and its own colours.",
+  "layout": "layout.json",
+  "styles": ["skin.css"],
+  "tokens": {
+    "bg": "#0d0a10",
+    "bg2": "#170f18",
+    "bg3": "#24121a",
+    "glow": "rgba(255, 107, 90, 0.10)",
+    "text": "#f7efe6",
+    "textDim": "#b3a296",
+    "card": "#22171f",
+    "accent": "#ff6b5a",
+    "onAccent": "#1a0b0b",
+    "radius": "0.5rem",
+    "gap": "1.2rem",
+    "tileWidth": "19rem",
+    "focusScale": 1.06,
+    "gridColumns": 7
+  },
+  "options": [
+    { "id": "stage", "type": "choice", "label": "Marquee size", "default": "large",
+      "choices": [{ "value": "large", "label": "Large" }, { "value": "compact", "label": "Compact" }] },
+    { "id": "accent", "type": "color", "label": "Accent colour", "default": "#ff6b5a",
+      "choices": [{ "value": "#ff6b5a", "label": "Coral" }, { "value": "#f2b84b", "label": "Gold" },
+        { "value": "#3fc6b8", "label": "Teal" }, { "value": "#9b8cff", "label": "Violet" }, { "value": "#8fd3ff", "label": "Ice" }] },
+    { "id": "names", "type": "toggle", "label": "Names under app icons", "default": true }
+  ]
+}

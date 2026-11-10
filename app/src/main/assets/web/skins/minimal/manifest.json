@@ -1,0 +1,25 @@
+{
+  "id": "minimal",
+  "name": "Minimal (tokens only)",
+  "version": "1.0.0",
+  "apiVersion": 1,
+  "level": 0,
+  "author": "Web Launcher",
+  "description": "A level 0 example: the default layout re-coloured and re-sized with design tokens alone.",
+  "tokens": {
+    "bg": "#101418",
+    "bg2": "#141a1f",
+    "bg3": "#182026",
+    "glow": "rgba(80, 200, 160, 0.08)",
+    "text": "#e6f2ee",
+    "textDim": "#8fa8a0",
+    "card": "#1d272c",
+    "accent": "#4fd1a5",
+    "onAccent": "#0d1a16",
+    "radius": "1.4rem",
+    "gap": "1.8rem",
+    "tileWidth": "24rem",
+    "focusScale": 1.05,
+    "gridColumns": 5
+  }
+}

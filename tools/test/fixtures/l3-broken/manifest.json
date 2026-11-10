@@ -1,0 +1,10 @@
+{
+  "id": "l3-broken",
+  "name": "L3 broken (fallback test)",
+  "version": "0.1.0",
+  "apiVersion": 1,
+  "level": 3,
+  "author": "Web Launcher tests",
+  "description": "Its entry page never loads the SDK, so it never says ready: the core must fall back to the default skin.",
+  "entry": "missing.html"
+}

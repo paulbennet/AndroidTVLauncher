@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="skin.css">
+  <script type="module" src="skin.js"></script>
+</head>
+<body>
+  <aside class="rail">
+    <div class="greeting"></div>
+    <div class="time">--:--</div>
+    <div class="date"></div>
+    <div class="grow"></div>
+    <div class="count"></div>
+  </aside>
+  <main>
+    <section class="stage">
+      <div class="art"><img alt="" decoding="async"><div class="mono"></div></div>
+      <div class="about">
+        <div class="kicker"></div>
+        <div class="title"></div>
+        <div class="hint">OK to open · hold OK for more</div>
+        <div class="pill" data-nav data-action="settings">Launcher settings</div>
+      </div>
+    </section>
+    <div class="scroll" data-scroll>
+      <h2>Favourites</h2>
+      <div class="row" data-list="favourites"></div>
+      <h2 class="recent-title" hidden>Recent</h2>
+      <div class="row recent" data-scroll></div>
+      <h2 class="inputs-title" hidden>Inputs</h2>
+      <div class="row inputs" data-scroll></div>
+      <h2>All apps</h2>
+      <div class="shelf" data-list="apps"></div>
+    </div>
+  </main>
+</body>
+</html>

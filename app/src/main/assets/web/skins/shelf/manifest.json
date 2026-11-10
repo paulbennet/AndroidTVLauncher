@@ -1,0 +1,16 @@
+{
+  "id": "shelf",
+  "name": "Shelf (showcase L3)",
+  "version": "1.0.0",
+  "apiVersion": 1,
+  "level": 3,
+  "author": "Web Launcher",
+  "description": "A level 3 showcase: its own page with a side rail, a stage for the focused app and an A–Z shelf of apps, in a night or a paper theme.",
+  "entry": "skin.html",
+  "options": [
+    { "id": "theme", "type": "choice", "label": "Theme", "default": "night",
+      "choices": [{ "value": "night", "label": "Night" }, { "value": "paper", "label": "Paper" }] },
+    { "id": "groups", "type": "toggle", "label": "Group apps A–Z", "default": true },
+    { "id": "greeting", "type": "toggle", "label": "Greeting", "default": true }
+  ]
+}

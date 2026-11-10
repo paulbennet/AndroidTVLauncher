@@ -1,0 +1,59 @@
+/* Marquee: level 2 showcase. Only transform and opacity animate (docs/design-rules.md); every effect is painted
+   once. The marquee image is the focused tile's own banner, already decoded, so a focus move costs no new image.
+   Measured on the VU31 (p95 frame, default 31.6 ms, gate 1.15×): a second faded bar under every tile cost 39.5 ms;
+   a 32rem marquee 36.4 ms; this 26rem one 33.0 ms. */
+:root { --lx-accent: var(--lx-opt-accent, #ff6b5a); --lx-ring: var(--lx-accent); --mq-art: 26rem; }
+html[data-opt-stage="compact"] { --mq-art: 20rem; }
+
+/* Background: one dark gradient and a soft spotlight behind the marquee, both static. */
+lx-bg {
+  background:
+    radial-gradient(ellipse 45% 55% at 22% 18%, var(--lx-glow), transparent 70%),
+    linear-gradient(180deg, var(--lx-bg) 0%, var(--lx-bg2) 60%, var(--lx-bg3) 100%);
+}
+
+/* ---------- top: marquee and side column ---------- */
+#top { align-items: flex-end; padding: 2.2rem var(--lx-pad-x) 0.6rem; gap: 3rem; }
+#stage { padding: 0; min-height: 0; gap: 2.4rem; align-items: flex-end; flex: 0 1 auto; }
+#stage .lx-hero-art {
+  width: var(--mq-art); border-radius: 0.8rem;
+  box-shadow: 0 1.6rem 3rem rgba(0, 0, 0, 0.55); /* static: painted once */
+}
+#stage .lx-hero-title {
+  font-size: 3.2rem; font-weight: 300; letter-spacing: -0.04rem; line-height: 1.05;
+  max-width: 26rem; padding-bottom: 0.6rem;
+  border-bottom: 0.25rem solid var(--lx-accent);
+}
+html[data-opt-stage="compact"] #stage .lx-hero-title { font-size: 2.4rem; }
+
+#side { align-items: flex-end; gap: 1rem; }
+#side lx-clock { text-align: right; }
+#side lx-clock .lx-time { font-size: 3.6rem; font-weight: 200; }
+#chips { gap: 0.6rem; }
+lx-memory, lx-settings { background: rgba(247, 239, 230, 0.07); }
+
+/* ---------- shelves ---------- */
+#shelves { padding-top: 0.4rem; }
+lx-section.shelf > .lx-title {
+  font-size: 1.1rem; font-weight: 600; letter-spacing: 0.18rem; text-transform: uppercase;
+  color: var(--lx-text-dim); margin: 1.6rem 0 0.8rem;
+}
+lx-section.shelf > .lx-title .lx-count { letter-spacing: 0; text-transform: none; }
+
+/* Banners: radius on the image itself (no overflow mask layer); focus = scale plus the core's faded ring. */
+lx-row > lx-tile { background: transparent; }
+lx-tile[kind="banner"] .lx-banner { border-radius: var(--lx-radius); }
+
+/* minmax(0, 1fr): long app names must not widen a column past the screen. */
+lx-grid { grid-template-columns: repeat(var(--lx-grid-columns), minmax(0, 1fr)); row-gap: 1.6rem; }
+
+/* Icon tiles: flat, smaller, with the name below the icon. */
+lx-grid > lx-tile[kind="icon"] { background: rgba(247, 239, 230, 0.04); }
+lx-grid > lx-tile .lx-icon, lx-grid > lx-tile .lx-initials { width: 30%; }
+lx-grid > lx-tile .lx-name { font-size: 0.85rem; color: var(--lx-text-dim); }
+lx-grid > lx-tile[focused] .lx-name { color: var(--lx-text); }
+html[data-opt-names="off"] lx-grid > lx-tile .lx-name { display: none; }
+
+/* Inputs: narrower flat tiles, accent icon when something is connected. */
+lx-section.inputs lx-row > lx-tile { flex-basis: 13rem; background: rgba(247, 239, 230, 0.04); }
+lx-tile[kind="input"][connected] .lx-input-icon { color: var(--lx-accent); }
