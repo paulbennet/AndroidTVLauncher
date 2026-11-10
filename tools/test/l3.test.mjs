@@ -94,8 +94,12 @@ test('l3-basic: the core keeps the keys, the frame moves focus, OK and Menu act 
 });
 
 test('l3-hostile: no parent, storage, network, popups or navigation; stolen focus comes back; unknown ids rejected', { timeout: 60000 }, async () => {
+  // The focus guard listens for the window's blur, and a page without window focus never blurs. On a headless CI
+  // runner the page doesn't always have it, so give it focus first and wait for the result, not a fixed time.
+  await page.bringToFront();
   const frame = await open('l3-hostile');
-  await page.waitForTimeout(800);
+  for (let t = 0; t < 5000 && !logs.some(l => l.startsWith('L3_FOCUS_RECLAIMED')); t += 100) await page.waitForTimeout(100);
+  await page.waitForTimeout(300);
   const r = await frame.evaluate(() => window.__results);
   for (const k of ['parentDocument', 'topLocation', 'localStorage', 'cookie', 'bridge', 'openWindow', 'topNavigate', 'fetchCore', 'fetchExternal', 'imageExternal', 'bridgeCall', 'webrtc', 'webSocket'])
     assert.match(r[k], /^blocked/, `${k}: ${r[k]}`);
