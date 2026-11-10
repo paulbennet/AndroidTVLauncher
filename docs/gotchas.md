@@ -83,6 +83,9 @@ Android 14) and the Android TV 12 emulator; other TVs may differ.
 - `npm test` needs the glob `tools/test/*.test.mjs`; a directory argument fails on Node 24.
 - Tests and `lx` need Chrome for Testing (`npx playwright-core install chromium`, or set `LX_CHROME`).
 - The Skin menu is async: tests must wait for its title before they read the items.
+- Headless Chrome on a Linux CI runner doesn't let a sandboxed frame take the focus (`focus()` does nothing), so the
+  focus guard's window `blur` never fires there. The `l3-hostile` test accepts that, and checks only that the frame
+  doesn't end up with the focus. On Windows and in Android WebView the steal happens and the guard takes it back.
 - Menus replace each other: end the previous screen first (`endMenu()`), or its `onClose` runs late.
 - Line endings are LF. Some Windows tools write CRLF.
 
