@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Web TV Launcher skins</title>
+<meta name="description" content="Skins for Web TV Launcher, a home screen for Android TV and Google TV. Install them from the TV in two presses.">
+<style>
+  :root { color-scheme: dark; --bg: #0f0e14; --card: #1a1822; --fg: #efeaf7; --muted: #aaa2bd; --accent: #f2a93b; --line: #2c2938; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 17px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  header, main, footer { max-width: 76rem; margin: 0 auto; padding: 0 16px; }
+  header { padding-top: 2.6rem; }
+  h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); margin: 0 0 .3rem; letter-spacing: -.01em; }
+  .lead { color: var(--muted); margin: 0 0 1.6rem; max-width: 46rem; }
+  a { color: var(--accent); }
+  code { font-size: .92em; overflow-wrap: anywhere; background: var(--card); padding: .1em .35em; border-radius: .3em; }
+  .steps { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 1.1rem 1.3rem; margin-bottom: 2.2rem; }
+  .steps h2 { font-size: 1.1rem; margin: 0 0 .5rem; }
+  .steps ol { margin: 0; padding-left: 1.3rem; } .steps li { margin: .3rem 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr)); gap: 1.4rem; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
+  .card img { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; display: block; background: #000; }
+  .text { padding: .9rem 1.1rem 1.1rem; }
+  .text h2 { font-size: 1.25rem; margin: 0; }
+  .meta { color: var(--muted); font-size: .9rem; margin: .15rem 0 .6rem; }
+  .text p { margin: .4rem 0 0; }
+  .how { color: var(--muted); font-size: .92rem; }
+  .tier { font-weight: 600; color: var(--fg); }
+  .tier-heavy { color: #ffb38a; }
+  .tiers { color: var(--muted); font-size: .92rem; margin: 2rem 0 0; }
+  footer { color: var(--muted); font-size: .9rem; padding-top: 2rem; padding-bottom: 3rem; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Skins for Web TV Launcher</h1>
+  <p class="lead">9 skins that each try a different idea: a night sky, a sea floor, cut paper, a terminal, a poster,
+  a toy box, an aquarium, a winter room and falling code. All of them are free, run without network access and were
+  measured on a real 2 GB Android TV.</p>
+  <section class="steps">
+    <h2>Install one on your TV</h2>
+    <ol>
+      <li>Install Web TV Launcher first: <a href="../">how to set it up</a>.</li>
+      <li>On the TV, open <strong>Launcher settings → Install skin → Skin gallery</strong> and pick
+          <strong>Use the Web TV Launcher gallery</strong>.</li>
+      <li>Choose a skin and press <strong>Install</strong>, then <strong>Use it now</strong>.</li>
+    </ol>
+    <p>Older launcher versions: open <strong>Install skin</strong>, scan the code with your phone and paste this link in
+    “Gallery link”: <code>https://paulbennet.github.io/AndroidTVLauncher/gallery/gallery.json</code></p>
+  </section>
+</header>
+<main>
+  <div class="grid">
+  <article class="card">
+    <img src="../gallery/constellation-1.0.0.jpg" alt="Constellation on a TV" loading="lazy" width="1280" height="720">
+    <div class="text">
+      <h2>Constellation</h2>
+      <p class="meta">Level 3 · <span class="tier tier-standard">Standard</span> · score 82 · 161 KB</p>
+      <p>Your apps as a night-sky map. Favourites form a bright constellation, other apps are fainter stars, and a three.js sky that can move in depth as you fly from star to star.</p>
+      <p class="how">three.js sky painted once, then flattened to one picture; stars as focus targets placed by hand.</p>
+    </div>
+  </article>
+  <article class="card">
+    <img src="../gallery/tidepool-1.0.0.jpg" alt="Tidepool on a TV" loading="lazy" width="1280" height="720">
+    <div class="text">
+      <h2>Tidepool</h2>
+      <p class="meta">Level 3 · <span class="tier tier-heavy">Heavy</span> · score 77 · 221 KB</p>
+      <p>A calm deep-sea pool: glass pebbles for your apps, and caustic light (three.js) that takes the colour of the app you pick.</p>
+      <p class="how">three.js caustic light baked into the sea-floor picture when the focus rests; opaque &quot;glass&quot; pebbles.</p>
+    </div>
+  </article>
+  <article class="card">
+    <img src="../gallery/papercut-1.0.0.jpg" alt="Paper Cut on a TV" loading="lazy" width="1280" height="720">
+    <div class="text">
+      <h2>Paper Cut</h2>
+      <p class="meta">Level 3 · <span class="tier tier-heavy">Heavy</span> · score 84 · 166 KB</p>
+      <p>A hand-made paper diorama: layered paper hills (three.js) that follow the time of day, pinned paper cards for your apps, and optional depth motion.</p>
+      <p class="how">three.js paper hills painted once per time of day; follows the clock (day, dusk, night).</p>
+    </div>
+  </article>
+  <article class="card">
+    <img src="../gallery/aquarium-1.0.0.jpg" alt="Live Aquarium on a TV" loading="lazy" width="1280" height="720">
+    <div class="text">
+      <h2>Live Aquarium</h2>
+      <p class="meta">Level 3 · <span class="tier tier-heavy">Heavy</span> · score 52 · 321 KB</p>
+      <p>A planted reef tank fills the screen; fish swim for a while after each key press, then rest. Your apps sit in one quiet row, and the row steps aside when you only watch.</p>
+      <p class="how">Live for 20 s after a key: fish cut-outs drawn on a canvas over a still tank, then the scene rests.</p>
+    </div>
+  </article>
+  <article class="card">
+    <img src="../gallery/holiday-1.0.0.jpg" alt="Holiday on a TV" loading="lazy" width="1280" height="720">
+    <div class="text">
+      <h2>Holiday</h2>
+      <p class="meta">Level 3 · <span class="tier tier-heavy">Heavy</span> · score 47 · 289 KB</p>
+      <p>A cosy living room on a winter evening: the fire flickers, the tree lights twinkle and snow falls outside for a while after each key press. Your apps sit in one quiet row.</p>
+      <p class="how">Live for 20 s after a key: fire glow, tree lights and snow over a still photo of the room.</p>
+    </div>
+  </article>
+  <article class="card">
+    <img src="../gallery/coderain-1.0.0.jpg" alt="Code Rain on a TV" loading="lazy" width="1280" height="720">
+    <div class="text">
+      <h2>Code Rain</h2>
+      <p class="meta">Level 3 · <span class="tier tier-heavy">Heavy</span> · score 28 · 52 KB</p>
+      <p>Streams of glowing code fall in depth over a dark floor. Each app is a stream that ends in its picture and name; the rain falls for a while after each key press, then holds still.</p>
+      <p class="how">Live for 20 s after a key: three depths of glyph rain from sprite sheets; apps are portals in the rain.</p>
+    </div>
+  </article>
+  <article class="card">
+    <img src="../gallery/phosphor-1.0.0.jpg" alt="Phosphor on a TV" loading="lazy" width="1280" height="720">
+    <div class="text">
+      <h2>Phosphor</h2>
+      <p class="meta">Level 1 · <span class="tier tier-lite">Lite</span> · score 100 · 46 KB</p>
+      <p>A 1980s green-screen terminal as your home screen. Level 1: only CSS on the launcher's own layout, no scripts.</p>
+      <p class="how">Level 1: only CSS on the default layout. Static glow and scanlines, three colours.</p>
+    </div>
+  </article>
+  <article class="card">
+    <img src="../gallery/bauhaus-1.0.0.jpg" alt="Bauhaus on a TV" loading="lazy" width="1280" height="720">
+    <div class="text">
+      <h2>Bauhaus</h2>
+      <p class="meta">Level 2 · <span class="tier tier-lite">Lite</span> · score 100 · 26 KB</p>
+      <p>A 1920s poster as your home screen: a giant clock over a red circle, primary-colour blocks with one shape each, and the focused app set vertically. Level 2: a layout file and CSS.</p>
+      <p class="how">Level 2: its own layout file plus CSS. Flat shapes, no pictures, the fastest skin here.</p>
+    </div>
+  </article>
+  <article class="card">
+    <img src="../gallery/playroom-1.0.0.jpg" alt="Playroom on a TV" loading="lazy" width="1280" height="720">
+    <div class="text">
+      <h2>Playroom</h2>
+      <p class="meta">Level 3 · <span class="tier tier-lite">Lite</span> · score 90 · 39 KB</p>
+      <p>A toy box for children: chunky building blocks, a clock made of toy blocks and a friendly mascot that looks at what you pick. Other apps stay behind a grown-up switch.</p>
+      <p class="how">Level 2 for children: big blocks, a mascot that looks at the focused block.</p>
+    </div>
+  </article>
+  </div>
+  <p class="tiers">Tiers come from <code>lx bench --tv</code> on a Sony Bravia (Mali-G31, 2 GB). <strong>Lite</strong>,
+  <strong>Standard</strong> and <strong>Rich</strong> pass every gate. <strong>Heavy</strong> skins failed only a
+  smoothness gate: the TV uses them only when you turn on <strong>Launcher settings → Allow heavy skins</strong>.</p>
+</main>
+<footer>
+  Make your own: <a href="https://github.com/paulbennet/AndroidTVLauncher/blob/main/docs/skin-api.md">skin guide</a> ·
+  source of these skins: <a href="https://github.com/paulbennet/AndroidTVLauncher/tree/main/gallery/skins">gallery/skins</a> ·
+  <a href="https://github.com/paulbennet/AndroidTVLauncher">Web TV Launcher on GitHub</a>
+</footer>
+</body>
+</html>

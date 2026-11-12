@@ -21,3 +21,6 @@ private/
 
 # This PC only: tool paths and the TV address
 scripts/env.local.sh
+
+# three.js gallery skins: built by npm run build:three
+gallery/skins/*/vendor/

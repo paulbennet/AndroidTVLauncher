@@ -236,3 +236,57 @@ test('Set up this TV: opens once on a Google TV, opens TV Settings screens, show
   await activate('Set up this TV');
   assert.equal(await title(), 'Set up this TV');
 });
+
+test('a Heavy skin is used only when "Allow heavy skins" is on (R27)', { timeout: 60000 }, async () => {
+  const box = await mkdtemp(join(tmpdir(), 'lx-heavy-'));
+  const dir = join(box, 'heavy-skin');
+  await cp(fixture('l3-basic'), dir, { recursive: true });
+  const m = JSON.parse(await (await import('node:fs/promises')).readFile(join(dir, 'manifest.json'), 'utf8'));
+  await writeFile(join(dir, 'manifest.json'), JSON.stringify({ ...m, id: 'heavy-skin', name: 'Heavy Skin' }));
+  await writeFile(join(dir, 'score.json'), JSON.stringify({ tier: 'Heavy', tierEstimate: false, lint: { ok: true }, bench: { score: 55 } }));
+  const s2 = await startServer({ skins: [{ dir }] });
+  const title = t => page.waitForFunction(x => document.querySelector('lx-overlay').shadowRoot.querySelector('.title').textContent === x, t);
+  const loaded = () => page.evaluate(() => document.documentElement.dataset.skin);
+  const open = async () => {
+    await page.goto(`${s2.url}/?apps=50`);
+    await page.waitForFunction(() => document.documentElement.dataset.state === 'ready');
+    await page.evaluate(() => window.launcher.onMenu());
+    await activate('Launcher settings');
+  };
+  try {
+    await page.goto(`${s2.url}/?apps=50`);
+    await page.evaluate(() => { localStorage.clear(); localStorage.setItem('setupSeen', 'true'); });
+    // Off (the default): picking the skin does nothing but explain.
+    await open();
+    await activate('Skin'); await title('Skin');
+    await activate('Heavy Skin');
+    await page.waitForTimeout(600);
+    assert.equal(await loaded(), 'default');
+    assert.match(await page.evaluate(() => document.body.innerText + [...document.querySelectorAll('*')].map(e => e.shadowRoot ? e.shadowRoot.textContent : '').join(' ')), /Allow heavy skins/);
+    // On: the skin loads.
+    await open();
+    await activate('Allow heavy skins'); await title('Launcher settings');
+    assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem('allowHeavy'))), true);
+    await activate('Skin'); await title('Skin');
+    const nav = page.waitForNavigation();
+    await activate('Heavy Skin');
+    await nav;
+    await page.waitForFunction(() => document.documentElement.dataset.state === 'ready');
+    assert.equal(await loaded(), 'heavy-skin');
+    // Off again while it is active: back to the default skin.
+    await page.evaluate(() => window.launcher.onMenu());
+    await activate('Launcher settings');
+    const nav2 = page.waitForNavigation();
+    await activate('Allow heavy skins');
+    await nav2;
+    await page.waitForFunction(() => document.documentElement.dataset.state === 'ready');
+    assert.equal(await loaded(), 'default');
+    // A settings import that names a Heavy skin, with the setting off: the skin is dropped after the start.
+    const exported = JSON.parse(await page.evaluate(() => window.launcher.exportSettings()));
+    const nav3 = page.waitForNavigation();
+    assert.equal(JSON.parse(await page.evaluate(t => window.launcher.importSettings(t), JSON.stringify({ ...exported, skin: 'heavy-skin' }))).ok, true);
+    await nav3;
+    await page.waitForFunction(() => document.documentElement.dataset.skin === 'default' && document.documentElement.dataset.state === 'ready', null, { timeout: 20000 });
+    assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem('skin'))), 'default');
+  } finally { await s2.close(); await page.evaluate(() => localStorage.clear()).catch(() => {}); }
+});

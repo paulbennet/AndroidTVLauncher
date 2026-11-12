@@ -1,0 +1,22 @@
+{
+  "id": "bauhaus",
+  "name": "Bauhaus",
+  "version": "1.0.0",
+  "apiVersion": 1,
+  "level": 2,
+  "author": "Web TV Launcher",
+  "description": "A 1920s poster as your home screen: a giant clock over a red circle, primary-colour blocks with one shape each, and the focused app set vertically. Level 2: a layout file and CSS.",
+  "tokens": {
+    "bg": "#F1EADB", "bg2": "#F1EADB", "bg3": "#F1EADB", "glow": "rgba(0,0,0,0)",
+    "text": "#151515", "textDim": "#151515", "card": "#1D4F91", "accent": "#D3311F", "onAccent": "#F1EADB",
+    "radius": "0rem", "focusScale": 1, "font": "\"Jost\", system-ui, sans-serif"
+  },
+  "styles": ["skin.css"],
+  "layout": "layout.json",
+  "options": [
+    { "id": "palette", "type": "choice", "label": "Palette", "default": "primary",
+      "choices": [{ "value": "primary", "label": "Primary" }, { "value": "blackred", "label": "Black & red" }, { "value": "bluenight", "label": "Blue night" }] },
+    { "id": "composition", "type": "choice", "label": "Composition", "default": "poster",
+      "choices": [{ "value": "poster", "label": "Poster" }, { "value": "frame", "label": "Frame" }] }
+  ]
+}

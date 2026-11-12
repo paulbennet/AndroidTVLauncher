@@ -1,0 +1,19 @@
+{
+  "id": "playroom",
+  "name": "Playroom",
+  "version": "1.0.0",
+  "apiVersion": 1,
+  "level": 3,
+  "author": "Web TV Launcher",
+  "description": "A toy box for children: chunky building blocks, a clock made of toy blocks and a friendly mascot that looks at what you pick. Other apps stay behind a grown-up switch.",
+  "entry": "skin.html",
+  "options": [
+    { "id": "allapps", "type": "choice", "label": "All apps", "default": "grownup",
+      "choices": [{ "value": "grownup", "label": "Grown-ups only" }, { "value": "show", "label": "Show a row of all apps" }] },
+    { "id": "colours", "type": "choice", "label": "Colours", "default": "bright",
+      "choices": [{ "value": "bright", "label": "Bright" }, { "value": "soft", "label": "Soft pastel" }] },
+    { "id": "mascot", "type": "toggle", "label": "Mascot", "default": true },
+    { "id": "size", "type": "choice", "label": "Block size", "default": "big",
+      "choices": [{ "value": "big", "label": "Big" }, { "value": "bigger", "label": "Bigger" }] }
+  ]
+}

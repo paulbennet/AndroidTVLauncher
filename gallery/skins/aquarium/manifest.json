@@ -1,0 +1,17 @@
+{
+  "id": "aquarium",
+  "name": "Live Aquarium",
+  "version": "1.0.0",
+  "apiVersion": 1,
+  "level": 3,
+  "author": "Web TV Launcher",
+  "description": "A planted reef tank fills the screen; fish swim for a while after each key press, then rest. Your apps sit in one quiet row, and the row steps aside when you only watch.",
+  "entry": "skin.html",
+  "options": [
+    { "id": "motion", "type": "choice", "label": "Fish swim", "default": "key",
+      "choices": [{ "value": "key", "label": "For 20 s after a key" }, { "value": "off", "label": "Never (still picture)" }] },
+    { "id": "fish", "type": "choice", "label": "Fish", "default": "many",
+      "choices": [{ "value": "many", "label": "Many" }, { "value": "few", "label": "Few" }] },
+    { "id": "ambient", "type": "toggle", "label": "Hide the app row when idle", "default": true }
+  ]
+}

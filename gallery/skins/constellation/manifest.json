@@ -1,0 +1,19 @@
+{
+  "id": "constellation",
+  "name": "Constellation",
+  "version": "1.0.0",
+  "apiVersion": 1,
+  "level": 3,
+  "author": "Web TV Launcher",
+  "description": "Your apps as a night-sky map. Favourites form a bright constellation, other apps are fainter stars, and a three.js sky that can move in depth as you fly from star to star.",
+  "entry": "skin.html",
+  "options": [
+    { "id": "sky", "type": "choice", "label": "Sky", "default": "night",
+      "choices": [{ "value": "night", "label": "Night" }, { "value": "deep", "label": "Deep space" }, { "value": "dawn", "label": "Dawn" }] },
+    { "id": "milkyway", "type": "toggle", "label": "Milky Way", "default": true },
+    { "id": "lines", "type": "toggle", "label": "Constellation lines", "default": true },
+    { "id": "labels", "type": "choice", "label": "App names", "default": "all",
+      "choices": [{ "value": "all", "label": "Always" }, { "value": "focus", "label": "Only when focused" }] },
+    { "id": "depth", "type": "toggle", "label": "Depth motion (the sky moves; smooth on fast TVs only)", "default": false }
+  ]
+}

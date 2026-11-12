@@ -57,6 +57,8 @@ declare namespace LxSkin {
     home: undefined;
     /** The launcher is in front again. */
     resume: undefined;
+    /** OK was pressed on an app or input: the core opens it right after this event (the id from `data`). */
+    launch: string;
     /** True when the launcher page is hidden. */
     visibility: boolean;
   }

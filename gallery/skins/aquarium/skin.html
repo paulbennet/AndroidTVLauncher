@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="skin.css">
+  <script type="module" src="skin.js"></script>
+</head>
+<body>
+  <!-- The tank: one still picture. The fish are drawn on the canvas above it (fish.js), only for a while after a key. -->
+  <div class="tank" aria-hidden="true"></div>
+  <canvas class="fish" aria-hidden="true"></canvas>
+  <div class="shade" aria-hidden="true"></div>
+
+  <header><div class="time">--:--</div><div class="date"></div></header>
+
+  <main>
+    <div class="title"></div>
+    <div class="row" data-scroll>
+      <div class="list favs" data-list="favourites"></div>
+      <div class="list apps" data-list="apps"></div>
+    </div>
+  </main>
+
+  <footer class="inputs"></footer>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="skin.css">
+  <script type="module" src="skin.js"></script>
+</head>
+<body>
+  <!-- Sky: two depth layers rendered once by three.js (sky.js), moved with CSS transforms on focus. -->
+  <div class="sky" aria-hidden="true">
+    <canvas class="layer far"></canvas>
+    <canvas class="layer near"></canvas>
+  </div>
+  <svg class="hills" viewBox="0 0 1920 420" preserveAspectRatio="none" aria-hidden="true">
+    <path class="hill back" d="M0 120 C 180 70 330 100 480 80 C 660 55 820 110 1000 88 C 1180 66 1330 40 1520 70 C 1700 96 1820 70 1920 60 L 1920 420 L 0 420 Z"/>
+    <path class="hill front" d="M0 170 C 220 130 420 160 640 140 C 860 120 1080 170 1300 150 C 1520 130 1720 160 1920 140 L 1920 420 L 0 420 Z"/>
+  </svg>
+
+  <header>
+    <div class="clock"><div class="time">--:--</div><div class="date"></div></div>
+    <div class="pill" data-nav data-action="settings" aria-label="Launcher settings">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></svg>
+    </div>
+  </header>
+
+  <main>
+    <svg class="lines" aria-hidden="true"></svg>
+    <div class="favs" data-list="favourites"></div>
+    <div class="recent-title" hidden>RECENT</div>
+    <div class="recent" data-scroll></div>
+    <div class="field" data-scroll><div class="apps" data-list="apps"></div></div>
+    <div class="card" hidden>
+      <div class="art"><img alt="" decoding="async"><div class="mono"></div></div>
+      <div class="kicker"></div>
+      <div class="title"></div>
+      <div class="hint">OK to open · hold OK for more</div>
+    </div>
+  </main>
+
+  <footer class="horizon" data-scroll><div class="inputs"></div></footer>
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <path id="spark" d="M12 0 C 13 8.5 15.5 11 24 12 C 15.5 13 13 15.5 12 24 C 11 15.5 8.5 13 0 12 C 8.5 11 11 8.5 12 0 Z"/>
+    </defs>
+  </svg>
+</body>
+</html>

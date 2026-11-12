@@ -1,0 +1,22 @@
+{
+  "id": "phosphor",
+  "name": "Phosphor",
+  "version": "1.0.0",
+  "apiVersion": 1,
+  "level": 1,
+  "author": "Web TV Launcher",
+  "description": "A 1980s green-screen terminal as your home screen. Level 1: only CSS on the launcher's own layout, no scripts.",
+  "tokens": {
+    "bg": "#050A05", "bg2": "#050A05", "bg3": "#050A05", "glow": "rgba(0,0,0,0)",
+    "text": "#3BFF6A", "textDim": "#1E9A45", "card": "rgba(0,0,0,0)",
+    "accent": "#3BFF6A", "onAccent": "#041004", "radius": "0rem", "focusScale": 1,
+    "font": "\"JetBrains Mono\", ui-monospace, monospace"
+  },
+  "styles": ["skin.css"],
+  "options": [
+    { "id": "colour", "type": "choice", "label": "Phosphor", "default": "green",
+      "choices": [{ "value": "green", "label": "Green" }, { "value": "amber", "label": "Amber" }, { "value": "white", "label": "White" }] },
+    { "id": "scanlines", "type": "toggle", "label": "Scanlines", "default": true },
+    { "id": "banners", "type": "toggle", "label": "Show the banner of the focused app", "default": false }
+  ]
+}

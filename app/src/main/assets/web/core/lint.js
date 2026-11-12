@@ -13,7 +13,7 @@ export const LINT_VERSION = 1;
 /** Starting limits (plan "Performance budget"); calibrated on the TV in M1.6. */
 export const BUDGET = {
   packageBytes: 5 * 1024 * 1024,
-  jsBytes: 150 * 1024,
+  jsBytes: 512 * 1024,             // level 3; enough for a tree-shaken three.js (~470 KB) loaded after the first frame
   cssBytes: 60 * 1024,
   fontFiles: 2,
   fontBytes: 300 * 1024,

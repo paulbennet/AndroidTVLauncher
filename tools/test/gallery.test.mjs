@@ -58,11 +58,17 @@ test('Skin gallery: not set, loading, list, entry, install; errors and leaving w
   await activate('Launcher settings');
   await activate('Install skin');
   await activate('Skin gallery');
-  assert.deepEqual(await items(), ['No gallery is set', 'Set one on the Install skin page (phone or computer)']);
+  assert.deepEqual(await items(), ['Use the Web TV Launcher gallery', 'Or set another link on the Install skin page (phone or computer)']);
+  // One press sets the project's gallery (then it loads; the mock has no gallery yet, so it shows Loading…).
+  await activate('Use the Web TV Launcher gallery');
+  assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem('galleryUrl'))), 'https://paulbennet.github.io/AndroidTVLauncher/gallery/gallery.json');
+  await ready();
+  await page.evaluate(() => window.launcher.onMenu());
+  await activate('Launcher settings');
+  await activate('Install skin');
 
   await page.evaluate(() => window.launcher.setGalleryUrl('https://example.com/gallery.json'));
   await page.evaluate(g => { window.__gallery = g; }, GALLERY);
-  await activate('Set one'); // back to Install skin
   await activate('Skin gallery');
   assert.deepEqual(await items(), ['Loading…']);
   await page.waitForFunction(() => document.querySelector('lx-overlay').shadowRoot.querySelector('.title').textContent.startsWith('Skin gallery ·'));

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="skin.css">
+  <script type="module" src="skin.js"></script>
+</head>
+<body>
+  <!-- The room: sky, clouds and a wooden floor (static). -->
+  <svg class="room" viewBox="0 0 1920 1080" preserveAspectRatio="none" aria-hidden="true">
+    <g class="cloud"><path d="M60 125 a 44 44 0 0 1 62 -52 a 58 58 0 0 1 106 22 a 36 36 0 0 1 0 72 h -150 a 30 30 0 0 1 -18 -42 Z"/></g>
+    <g class="cloud"><path d="M1100 395 a 32 32 0 0 1 48 -40 a 44 44 0 0 1 80 18 a 26 26 0 0 1 4 52 h -118 a 22 22 0 0 1 -14 -30 Z"/></g>
+    <g class="cloud"><path d="M1510 380 a 46 46 0 0 1 66 -56 a 60 60 0 0 1 108 26 a 36 36 0 0 1 4 72 h -164 a 30 30 0 0 1 -14 -42 Z"/></g>
+    <g class="cloud"><path d="M1752 415 a 28 28 0 0 1 42 -34 a 38 38 0 0 1 68 16 a 22 22 0 0 1 2 44 h -100 a 18 18 0 0 1 -12 -26 Z"/></g>
+    <rect class="floor" x="0" y="1000" width="1920" height="80"/>
+    <g class="planks"><path d="M0 1035 H1920 M110 1000 L80 1035 M520 1000 L490 1035 M930 1000 L900 1035 M1340 1000 L1310 1035 M1750 1000 L1720 1035 M300 1035 L270 1080 M720 1035 L690 1080 M1130 1035 L1100 1080 M1550 1035 L1520 1080"/></g>
+  </svg>
+
+  <!-- The mascot (from the release art): one SVG, poses switched by a class on <body>. -->
+  <svg class="mascot" viewBox="0 0 400 300" aria-hidden="true">
+    <path class="body" d="M70 300 C 30 300 0 280 0 248 C 0 222 18 206 42 200 C 40 92 106 8 200 8 C 294 8 352 92 350 200 C 374 206 396 222 396 250 C 396 282 368 300 330 300 Z"/>
+    <g class="eyes open">
+      <ellipse class="eye" cx="148" cy="140" rx="46" ry="56"/><ellipse class="eye" cx="256" cy="140" rx="46" ry="56"/>
+      <g class="pupils"><circle cx="152" cy="150" r="21"/><circle cx="252" cy="150" r="21"/><circle class="shine" cx="143" cy="140" r="6"/><circle class="shine" cx="243" cy="140" r="6"/></g>
+      <path class="lid" d="M102 130 Q 148 104 194 130 M210 130 Q 256 104 302 130"/>
+    </g>
+    <g class="eyes closed"><path d="M110 140 Q 148 100 186 140 M218 140 Q 256 100 294 140"/></g>
+    <path class="brow" d="M118 72 Q 140 58 164 70 M236 70 Q 260 58 282 72"/>
+    <path class="mouth smile" d="M176 212 Q 202 236 228 212"/>
+    <path class="mouth grin" d="M150 196 Q 202 268 254 196 Z"/>
+    <path class="tongue" d="M178 236 Q 202 252 226 236 Q 202 226 178 236 Z"/>
+    <path class="hand" d="M40 262 C 34 228 72 214 98 232 C 116 246 110 274 96 282 C 90 290 80 280 74 288 C 66 296 56 286 50 290 C 40 292 40 276 40 262 Z M304 232 C 330 214 368 228 360 262 C 360 276 360 292 350 290 C 344 286 334 296 326 288 C 320 280 310 290 304 282 C 290 274 284 246 304 232 Z"/>
+  </svg>
+  <div class="bubble"><span class="greet">Hi! What shall we watch?</span></div>
+
+  <div class="clock" aria-label="Time"></div>
+
+  <main>
+    <div class="row favs" data-list="favourites"></div>
+    <div class="apps-row" data-scroll hidden><div class="row apps" data-list="apps"></div></div>
+  </main>
+
+  <div class="corner">
+    <div class="block small grown" data-nav data-action="settings"><span>Grown-ups:<br>hold OK</span></div>
+    <div class="block small gear" data-nav data-action="settings" aria-label="Settings">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg>
+      <span>Settings</span>
+    </div>
+  </div>
+</body>
+</html>

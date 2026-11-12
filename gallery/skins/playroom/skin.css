@@ -1,0 +1,118 @@
+/* Playroom: positions follow the 1920×1080 release art; 1rem = 16 design px. Focus = transform + opacity only;
+   pose changes swap opacity of static SVG parts; nothing moves at rest. */
+@font-face { font-family: "Fredoka"; font-weight: 600; src: url("fonts/fredoka-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "Fredoka"; font-weight: 700; src: url("fonts/fredoka-latin-700-normal.woff2") format("woff2"); }
+
+:root {
+  --sky: #5CC4F4; --cloud: #FFFFFF; --floor: #F6CB8E; --plank: #E2A867; --ink: #2B0F4E; --white: #FFFFFF;
+  --red: #FF2E44; --red-d: #C8102E; --yellow: #FFD42A; --yellow-d: #C99A00; --green: #27C93F; --green-d: #13932A;
+  --purple: #A032F0; --purple-d: #6E1CB2; --orange: #FF8F1C; --orange-d: #C7570A; --navy: #2B3A55; --navy-d: #1A253A;
+  --mascot: #A032F0; --mascot-line: #3D0A63;
+}
+html[data-opt-colours="soft"] {
+  --sky: #A9DDF5; --floor: #EED7B4; --plank: #D9B98C;
+  --red: #F48B93; --red-d: #CF6670; --yellow: #F7D37A; --yellow-d: #CFA94E; --green: #86D9A2; --green-d: #5FB47E;
+  --purple: #B79BF2; --purple-d: #8C6FCB; --orange: #F7B57A; --orange-d: #D08A4D; --mascot: #B79BF2;
+}
+* { box-sizing: border-box; }
+html { font-size: calc(100vw / 120); }
+html, body { margin: 0; height: 100%; overflow: hidden; user-select: none; }
+body { position: relative; background: var(--sky); color: var(--ink); font-family: "Fredoka", system-ui, sans-serif; font-weight: 700; }
+
+/* ---------- room ---------- */
+.room { position: absolute; inset: 0; width: 100%; height: 100%; }
+.room .cloud { fill: var(--cloud); }
+.room .floor { fill: var(--floor); }
+.room .planks { fill: none; stroke: var(--plank); stroke-width: 3; }
+
+/* ---------- mascot and greeting ---------- */
+.mascot { position: absolute; left: 6.9rem; top: 8.4rem; width: 24.4rem; height: 18.3rem; z-index: 3; overflow: visible; }
+html[data-opt-mascot="off"] .mascot { display: none; }
+.mascot .body { fill: var(--mascot); }
+.mascot .eye { fill: var(--white); stroke: var(--mascot-line); stroke-width: 6; }
+.mascot .pupils { fill: var(--mascot-line); } /* eyes jump like real eyes: a transition repaints the SVG every frame */
+.mascot .pupils .shine { fill: var(--white); }
+.mascot .lid { fill: none; stroke: var(--mascot-line); stroke-width: 0; }
+.mascot .brow, .mascot .eyes.closed path, .mascot .mouth.smile { fill: none; stroke: var(--mascot-line); stroke-width: 8; stroke-linecap: round; }
+.mascot .mouth.grin { fill: var(--mascot-line); }
+.mascot .tongue { fill: #FF8BA7; }
+.mascot .hand { fill: var(--mascot); stroke: var(--mascot-line); stroke-width: 6; stroke-linejoin: round; }
+.mascot .eyes.closed, .mascot .mouth.grin, .mascot .tongue { opacity: 0; }
+/* Happy (an app opens): eyes closed in arcs, big grin. Sleepy (10 min idle): heavy lids, pupils down. */
+body.happy .mascot .eyes.open, body.happy .mascot .mouth.smile { opacity: 0; }
+body.happy .mascot .eyes.closed, body.happy .mascot .mouth.grin, body.happy .mascot .tongue { opacity: 1; }
+body.sleepy .mascot .lid { stroke-width: 7; fill: var(--mascot); }
+body.sleepy .mascot .pupils { transform: translate(0, 12px) !important; }
+
+.bubble {
+  position: absolute; left: 34.7rem; top: 6.2rem; width: 45.9rem; height: 14rem; border-radius: 7rem; background: var(--white);
+  display: flex; align-items: center; justify-content: center; text-align: center; padding: 0 4rem; z-index: 2;
+}
+.bubble::before { content: ""; position: absolute; left: -2.2rem; bottom: 1rem; border: 1.6rem solid transparent; border-right: 3rem solid var(--white); border-bottom-color: var(--white); transform: rotate(18deg); }
+.greet { font-size: 4.6rem; line-height: 1.12; color: var(--ink); }
+html[data-opt-mascot="off"] .bubble { left: 6rem; }
+
+/* ---------- block clock ---------- */
+.clock { position: absolute; right: 4.5rem; top: 4rem; display: flex; align-items: flex-end; gap: 0.5rem; z-index: 2; }
+.cblock {
+  position: relative; height: 8.4rem; min-width: 6.8rem; padding: 0 1rem; border-radius: 1.6rem; margin-top: 1.6rem;
+  display: flex; align-items: center; justify-content: center; font-size: 6.2rem; line-height: 1; color: var(--white);
+  background: var(--c); box-shadow: inset 0 -1.1rem 0 var(--cd);
+}
+.cblock::before { /* two studs */
+  content: ""; position: absolute; top: -1.4rem; left: 1rem; width: 2.2rem; height: 1.6rem; border-radius: 0.8rem 0.8rem 0.3rem 0.3rem;
+  background: var(--cd); box-shadow: calc(100% + 0.4rem) 0 0 var(--cd);
+}
+.cblock.colon { min-width: 2.6rem; padding: 0; font-size: 4.2rem; }
+.cblock.colon::before { width: 1rem; left: 0.8rem; box-shadow: none; }
+.cblock.period { font-size: 4.6rem; padding-bottom: 0.8rem; }
+
+/* ---------- building blocks ---------- */
+.red { --c: var(--red); --cd: var(--red-d); } .yellow { --c: var(--yellow); --cd: var(--yellow-d); }
+.green { --c: var(--green); --cd: var(--green-d); } .purple { --c: var(--purple); --cd: var(--purple-d); }
+.orange { --c: var(--orange); --cd: var(--orange-d); }
+main { position: absolute; left: 0; right: 0; top: 25.8rem; bottom: 6rem; }
+.row { display: flex; gap: 1.6rem; padding: 3.6rem 3.8rem 3rem; overflow: hidden; } /* room for the hop and its studs */
+.block {
+  position: relative; flex: 0 0 auto; border-radius: 2.4rem; background: var(--c); color: var(--white);
+  box-shadow: inset 0 -1.8rem 0 var(--cd); display: flex; flex-direction: column; align-items: center; transform-origin: 50% 70%;
+  transition: transform 180ms cubic-bezier(.34, 1.56, .64, 1); scroll-margin: 3rem;
+}
+.block::before { /* two studs on top */
+  content: ""; position: absolute; top: -1.9rem; left: 18%; width: 4.4rem; height: 2.2rem; border-radius: 0.9rem; /* one radius: per-corner radii slow every frame */
+  background: var(--cd); box-shadow: 9rem 0 0 var(--cd);
+}
+.block::after { /* white outline for focus: static, faded in */
+  content: ""; position: absolute; inset: -0.8rem; border-radius: 3rem; border: 0.7rem solid var(--white); opacity: 0; /* no fade: a fading ring is one more animated layer */
+  z-index: -1; /* under the studs, like the release art */
+}
+.block[focused] { transform: translateY(-1.4rem) rotate(-2deg); z-index: 2; } /* hop, no zoom: a zoom re-rasters the block */
+.block[focused]::after { opacity: 1; }
+.block[data-moving]::after { opacity: 1; border-style: dashed; }
+.block.big { width: 20rem; height: 23rem; padding: 2.4rem 1.6rem 3rem; gap: 1.4rem; }
+html[data-opt-size="bigger"] .block.big { width: 24rem; height: 26.5rem; }
+.block .pic { flex: 1; width: 100%; border-radius: 1.4rem; overflow: hidden; background: rgba(255, 255, 255, 0.22); display: flex; align-items: center; justify-content: center; }
+.block .pic img { width: 100%; height: 100%; object-fit: cover; }
+.block .pic:not(.banner) img { width: 62%; height: 62%; object-fit: contain; }
+.block .pic.mono { font-size: 6rem; color: var(--white); }
+.block .name { font-size: 3rem; line-height: 1.05; text-align: center; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 0.2rem 0 var(--cd); }
+.block.yellow .name, .block.yellow .pic.mono { color: var(--ink); text-shadow: none; }
+
+/* The grown-up row of all apps (option), smaller blocks. */
+.apps-row { position: absolute; left: 0; right: 22rem; top: 24rem; height: 14rem; overflow: hidden; }
+.apps-row[hidden] { display: none; }
+.block.small { width: 12.5rem; height: 9.6rem; padding: 1rem 0.8rem 1.8rem; gap: 0.4rem; }
+.block.small::before { width: 2.8rem; height: 1.5rem; top: -1.3rem; box-shadow: 5.6rem 0 0 var(--cd); }
+.block.small .name { font-size: 1.7rem; }
+.apps .block.small .pic { display: none; }
+.apps .block.small { justify-content: center; }
+body.show-all .block.big { width: 17rem; height: 18rem; }
+body.show-all .block.big .name { font-size: 2.5rem; }
+
+/* ---------- corner: grown-up switch and Settings ---------- */
+.corner { position: absolute; right: 4.6rem; bottom: 1.8rem; display: flex; gap: 1.6rem; align-items: flex-end; z-index: 2; }
+.corner .block { --c: var(--navy); --cd: var(--navy-d); width: 16.5rem; height: 7.6rem; flex-direction: row; justify-content: center; gap: 0.8rem; padding: 0 1rem 1rem; font-size: 2.3rem; }
+.corner .block::before { width: 3rem; height: 1.6rem; top: -1.4rem; left: 20%; box-shadow: 6.4rem 0 0 var(--cd); }
+.corner .grown { width: 15rem; font-size: 1.7rem; line-height: 1.1; text-align: center; }
+body.show-all .corner .grown { display: none; }
+.corner svg { width: 3.4rem; height: 3.4rem; fill: none; stroke: var(--white); stroke-width: 2.4; stroke-linecap: round; }

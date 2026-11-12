@@ -109,6 +109,7 @@
       case 'nav': if (['up', 'down', 'left', 'right'].includes(m.dir)) move(m.dir); break;
       case 'home': home(); emit('home'); break;
       case 'resume': emit('resume'); break;
+      case 'launch': emit('launch', typeof m.itemId === 'string' ? m.itemId : null); break;
       case 'visibility': emit('visibility', !!m.hidden); break;
     }
   });

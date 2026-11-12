@@ -363,6 +363,7 @@ function settingsMenu() {
     if (boot) items.push({ label: 'Open at TV start', value: !boot.enabled ? 'Off' : boot.allowed ? 'On' : 'On · needs permission', keepOpen: true, run: bootMenu });
   }
   if (m.options.length && !safeMode) items.push({ label: 'Skin options', value: `${m.options.length}`, keepOpen: true, run: optionsMenu });
+  items.push({ label: 'Allow heavy skins', value: allowHeavy() ? 'On · they can stutter' : 'Off', keepOpen: true, run: () => setAllowHeavy(!allowHeavy()) });
   items.push(
     { label: 'Android settings', run: () => bridge.openSettings() },
     { label: showHidden ? 'Hide hidden apps' : `Show hidden apps (${hidden.length})`, run: () => { showHidden = !showHidden; render(); } },
@@ -380,8 +381,43 @@ async function skinsMenu() {
   const current = safeMode ? null : skin.manifest.id;
   openMenu('Skin', list.map(s => ({
     label: s.name, value: `L${s.level} · ${s.source}${badgeText(s.badge)}`, current: s.id === current,
-    run: () => switchSkin(s.id),
+    keepOpen: heavyBlocked(s.badge), run: () => useSkin(s.id, s.badge),
   })));
+}
+
+// ---------------------------------------------------------------- heavy skins (R27, decision D19 b)
+// A package whose score.json says tier "Heavy" failed a smoothness gate in `lx bench --tv`: it can stutter on a slow
+// TV. The launcher uses such a skin only when the owner turned "Allow heavy skins" on (off by default, per TV: the
+// setting is not part of a settings export).
+const HEAVY_TIER = 'Heavy';
+const allowHeavy = () => store.get('allowHeavy', false) === true;
+const heavyBlocked = badge => !!badge && badge.tier === HEAVY_TIER && !allowHeavy();
+const HEAVY_HELP = 'This skin is Heavy: it can stutter on slow TVs. To use it, turn on Launcher settings → Allow heavy skins.';
+
+/** Switches to a skin, unless it is Heavy and heavy skins are not allowed. */
+function useSkin(id, badge) {
+  if (heavyBlocked(badge)) { toast(HEAVY_HELP, 7000); return; }
+  switchSkin(id);
+}
+
+async function setAllowHeavy(on) {
+  store.set('allowHeavy', on);
+  if (!on && !safeMode && skin.manifest.id !== DEFAULT_SKIN) {
+    const me = (await listSkins()).find(s => s.id === skin.manifest.id);
+    if (me && heavyBlocked(me.badge)) { switchSkin(DEFAULT_SKIN); return; } // the active skin is Heavy
+  }
+  settingsMenu();
+}
+
+/** The first start after a settings import (it can name a Heavy skin): such a skin is not kept. */
+async function heavyCheck() {
+  if (!store.get('heavyCheck', false)) return;
+  store.remove('heavyCheck');
+  if (benchMode || safeMode || params.has('skin') || skin.manifest.id === DEFAULT_SKIN || allowHeavy()) return;
+  const me = (await listSkins()).find(s => s.id === skin.manifest.id);
+  if (!me || !heavyBlocked(me.badge)) return;
+  toast(`"${skin.manifest.name}" is a Heavy skin and heavy skins are off. Using the default skin.`, 5000);
+  setTimeout(() => switchSkin(DEFAULT_SKIN), 2500);
 }
 
 /**
@@ -459,11 +495,12 @@ async function onSkinInstalled(r) {
   const back = installScreen; // came in while Install skin was open: "Not now" goes back there
   const entry = (await listSkins()).find(s => s.id === r.id);
   const items = [
-    { label: active ? 'Reload it now' : 'Use it now', run: () => switchSkin(r.id) },
+    { label: active ? 'Reload it now' : 'Use it now', keepOpen: heavyBlocked(entry && entry.badge), run: () => useSkin(r.id, entry && entry.badge) },
     back ? { label: 'Install another', keepOpen: true, run: installMenu } : { label: 'Not now' },
   ];
   const badge = badgeText(entry && entry.badge).replace(/^ · /, '');
   if (badge) items.push({ label: `Score: ${badge}`, info: true });
+  if (heavyBlocked(entry && entry.badge)) items.push({ label: HEAVY_HELP, info: true });
   for (const w of ((r.lint && r.lint.warnings) || []).slice(0, 3)) items.push({ label: `⚠ ${w.message}${w.where ? ` [${w.where}]` : ''}`, info: true });
   openMenu(`Installed "${r.name}" ${r.version}`, items);
 }
@@ -531,6 +568,7 @@ function importSettings(text) {
   if (s.recent !== undefined) store.set('recent', s.recent.slice(0, RECENT_MAX));
   if (s.galleryUrl) store.set('galleryUrl', s.galleryUrl); else if (s.galleryUrl === '') store.remove('galleryUrl');
   store.set('skin', s.skin); // a skin that isn't on this TV falls back to the default one at load
+  store.set('heavyCheck', true); // the next start drops it if it is Heavy and heavy skins are off
   for (const [id, vals] of Object.entries(opts)) store.set('skinOptions.' + id, vals);
   console.log('SETTINGS_IMPORTED ' + JSON.stringify({ favs: s.favs ? s.favs.length : null, hidden: s.hidden.length, skin: s.skin }));
   setTimeout(() => location.replace('/index.html'), 300);
@@ -555,12 +593,15 @@ function setGalleryUrl(url) {
   return JSON.stringify({ ok: true, url });
 }
 
+/** The project's own gallery on GitHub Pages: one press sets it (the user can still set any other link). */
+const OFFICIAL_GALLERY = 'https://paulbennet.github.io/AndroidTVLauncher/gallery/gallery.json';
+
 function galleryMenu() {
   const url = store.get('galleryUrl', '');
   if (!url) {
     openMenu('Skin gallery', [
-      { label: 'No gallery is set', info: true },
-      { label: 'Set one on the Install skin page (phone or computer)', keepOpen: true, run: installMenu },
+      { label: 'Use the Web TV Launcher gallery', keepOpen: true, run: () => { store.set('galleryUrl', OFFICIAL_GALLERY); galleryList = null; galleryMenu(); } },
+      { label: 'Or set another link on the Install skin page (phone or computer)', keepOpen: true, run: installMenu },
     ]);
     return;
   }
@@ -609,6 +650,7 @@ function galleryEntry(s, mine) {
   const line = t => { if (t) { const p = document.createElement('p'); p.textContent = t; text.append(p); } };
   line(`Version ${s.version} · level ${s.level}${s.author ? ` · by ${s.author}` : ''}`);
   line(s.description);
+  if (s.tier === HEAVY_TIER) line(allowHeavy() ? 'Heavy: it can stutter on slow TVs.' : HEAVY_HELP);
   line([s.size ? `${Math.max(1, Math.round(s.size / 1024))} KB` : '', s.tier ? `${s.tier}${s.score != null ? ` (score ${s.score}, the author's claim)` : ''}` : ''].filter(Boolean).join(' · '));
   body.append(pic, text);
   const action = !mine ? 'Install' : mine.version === s.version ? 'Install again' : `Update to ${s.version}`;
@@ -822,10 +864,11 @@ function ok() {
   if (action === 'settings') return settingsMenu();
   if (itemId && frame.ids.has(itemId) && itemId.startsWith(INPUT_PREFIX)) {
     const input = inputs.find(i => INPUT_PREFIX + i.id === itemId);
+    if (input) framePost({ type: 'launch', itemId }); // lets the skin react (e.g. a mascot) before the app opens
     return input && openInput(input);
   }
   const app = itemId && frame.ids.has(itemId) ? byPkg(itemId) : null;
-  if (app) launch(app);
+  if (app) { framePost({ type: 'launch', itemId }); launch(app); }
 }
 
 // ---------------------------------------------------------------- runtime guard, script side (M2.2, R20)
@@ -1159,6 +1202,7 @@ async function boot() {
   else if (guardReason) toast(`Skin "${guardCulprit}" was turned off: ${GUARD_REASONS[guardReason]}. Using the default skin.`, 6000);
   else if (fallbackReason) toast(`Skin "${wanted}" failed to load; using the default skin.`, 5000);
   setTimeout(maybeFirstRunSetup, 1500); // after the first frames, so the start-up timing is not affected
+  setTimeout(heavyCheck, 1500);
 
   // Startup timing for scripts/probe.sh: process start / activity create -> first rendered frame.
   requestAnimationFrame(() => requestAnimationFrame(() => {

@@ -1,0 +1,16 @@
+{
+  "id": "holiday",
+  "name": "Holiday",
+  "version": "1.0.0",
+  "apiVersion": 1,
+  "level": 3,
+  "author": "Web TV Launcher",
+  "description": "A cosy living room on a winter evening: the fire flickers, the tree lights twinkle and snow falls outside for a while after each key press. Your apps sit in one quiet row.",
+  "entry": "skin.html",
+  "options": [
+    { "id": "motion", "type": "choice", "label": "Fire, lights and snow move", "default": "key",
+      "choices": [{ "value": "key", "label": "For 20 s after a key" }, { "value": "off", "label": "Never (still picture)" }] },
+    { "id": "greeting", "type": "toggle", "label": "Greeting under the clock", "default": true },
+    { "id": "ambient", "type": "toggle", "label": "Hide the app row when idle", "default": true }
+  ]
+}

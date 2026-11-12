@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="skin.css">
+  <script type="module" src="skin.js"></script>
+</head>
+<body>
+  <!-- The rain (rain.js): a 2D canvas, drawn for a while after a key; at rest the last picture stays. -->
+  <canvas class="rain" aria-hidden="true"></canvas>
+
+  <header><div class="time">--:--</div></header>
+
+  <main>
+    <div class="row" data-scroll>
+      <div class="list favs" data-list="favourites"></div>
+      <div class="list apps" data-list="apps"></div>
+    </div>
+  </main>
+
+  <footer class="inputs"></footer>
+</body>
+</html>

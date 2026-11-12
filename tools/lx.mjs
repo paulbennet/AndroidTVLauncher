@@ -5,7 +5,7 @@
 //   lx dev  <dir> --tv [host:port] | --lan host:port --pin N   live reload on the TV (installs on every save)
 //   lx lint <dir> [--apps 50] [--json] [--shot file.png] static + rendered checks (Chrome for Testing)
 //   lx bench <dir> [--tv [host:port]] [--runs 3] [--json]   frame/memory budget, score, tier
-//   lx pack <dir> [--tv [host:port]] [--out file.lxskin]  lint, bench, write score.json, zip
+//   lx pack <dir> [--tv [host:port] | --from bench.json] [--out file.lxskin]  lint, bench, write score.json, zip
 //   lx push <dir> [--tv host:port] [--open]              copy to the TV's dev skins folder (ADB)
 //   lx install <dir|file.lxskin> [--tv host:port | --lan host:port --pin N] [--open]   install it (any build)
 //   lx settings export [file] | import <file> [--tv host:port]   launcher settings (favourites, hidden, skin, options)
@@ -36,7 +36,7 @@ const { positionals, values: opt } = parseArgs({
     level: { type: 'string', default: '1' }, name: { type: 'string' }, port: { type: 'string', default: '5180' },
     apps: { type: 'string', default: String(REFERENCE_APPS) }, open: { type: 'boolean' }, json: { type: 'boolean' },
     shot: { type: 'string' }, out: { type: 'string' }, tv: { type: 'string' }, help: { type: 'boolean', short: 'h' },
-    runs: { type: 'string', default: '3' }, lan: { type: 'string' }, pin: { type: 'string' },
+    runs: { type: 'string', default: '3' }, from: { type: 'string' }, lan: { type: 'string' }, pin: { type: 'string' },
   },
 });
 const [cmd, dirArg] = positionals;
@@ -49,7 +49,7 @@ function usage(code = 0) {
   lx dev  <dir> --tv [host:port] | --lan host:port --pin 123456   live reload on the TV
   lx lint <dir> [--apps ${REFERENCE_APPS}] [--json] [--shot file.png]
   lx bench <dir> [--tv [host:port]] [--runs 3] [--json]
-  lx pack <dir> [--tv [host:port]] [--out file.lxskin]
+  lx pack <dir> [--tv [host:port] | --from bench.json] [--out file.lxskin]   --from: a saved lx bench --json result
   lx push <dir> [--tv host:port] [--open]
   lx install <dir|file.lxskin> [--tv host:port] [--open]      through the TV's ADB inbox
   lx install <dir|file.lxskin> --lan host:port --pin 123456    through the TV's Install skin page
@@ -255,9 +255,10 @@ async function cmdPack(arg) {
   const r = await runLint(dir, { apps: REFERENCE_APPS });
   printLint(dir, r);
   if (!r.ok) { console.error('Not packed: fix the errors above.'); process.exitCode = 1; return; }
-  const b = await runBench(dir, benchOptions());
+  const b = opt.from ? await savedBench(opt.from, r.skin.id) : await runBench(dir, benchOptions());
   printBench(dir, b);
-  if (!b.estimate && !b.gatesOk) { console.error('Not packed: a hard gate failed on the TV.'); process.exitCode = 1; return; }
+  if (!b.estimate && !b.tier) { console.error('Not packed: a hard gate (idle frames, memory or cold start) failed on the TV.'); process.exitCode = 1; return; }
+  if (b.tier === bench.HEAVY_TIER) console.log('Packed as Heavy: a smoothness gate failed. TVs use it only with "Allow heavy skins" on.');
   const { runsDetail, ...benchResult } = b;
   const score = {
     tool: 'lx', toolVersion: TOOL_VERSION, lintVersion: LINT_VERSION, apiVersion: API_VERSION,
@@ -573,10 +574,22 @@ async function runBench(dir, { tv: onTv = false, runs = 3, log = console.log } =
   }
   const summary = bench.summarize({ skinRuns: results[id], refRuns: results[ref], estimate: !onTv });
   return {
-    estimate: !onTv, device: deviceInfo, runs, referenceSkin: ref, referenceApps: bench.BENCH_APPS,
+    skinId: id, date: new Date().toISOString(), estimate: !onTv, device: deviceInfo, runs, referenceSkin: ref, referenceApps: bench.BENCH_APPS,
     tour: bench.TOUR, idleSeconds: onTv ? bench.IDLE_SECONDS : null, notes,
     ...summary, runsDetail: { skin: results[id], reference: results[ref] },
   };
+}
+
+/**
+ * `lx pack --from <file>`: a result saved with `lx bench <dir> --tv --json > file`, so a skin that did not change
+ * is not measured again. It is scored again with today's gates; a result for another skin is refused.
+ */
+async function savedBench(file, id) {
+  const saved = JSON.parse(await readFile(file, 'utf8'));
+  if (saved.skinId && saved.skinId !== id) throw new Error(`${file} is a bench of "${saved.skinId}", not "${id}"`);
+  const b = bench.rescore(saved);
+  b.notes.push(`from a saved bench (${relative(process.cwd(), resolve(file))}${saved.date ? ', ' + saved.date.slice(0, 10) : ''}); scored with today's gates`);
+  return b;
 }
 
 function printBench(dir, b) {
@@ -589,11 +602,13 @@ function printBench(dir, b) {
     console.log(`  Hard gates (frames, key latency, idle, memory, cold start) are checked with --tv only.`);
   }
   for (const g of b.estimate ? [] : b.gates) {
-    const mark = g.ok === null ? '' : g.ok ? '  ✔' : '  ✖';
+    const mark = g.ok === null ? '' : g.ok ? '  ✔' : g.smooth ? '  ✖ (smoothness)' : '  ✖ (hard)';
     console.log(`  ${g.label.padEnd(20)}${fmt(g.value, g.unit).padStart(10)}${fmt(b.reference[g.metric], g.unit).padStart(10)}   ${g.inclusive ? '≤' : '<'} ${g.limit ?? '—'}${unit(g.unit)}${g.relative ? ` (${g.relative}× ${b.referenceSkin})` : ''}${mark}`);
   }
+  if (b.p95Rank) console.log(`  p95 frame = the ${b.p95Rank}th slowest frame of each skin (5% of ${b.referenceSkin}'s frames, R16)`);
   for (const n of b.notes) console.log(`  ⚠ ${n}`);
-  const tier = b.tier ? `${b.tier}${b.estimate ? ' (estimate)' : ''}` : 'none (a hard gate failed)';
+  const tier = !b.tier ? 'none (a hard gate failed)' : b.tier === bench.HEAVY_TIER ? 'Heavy (a smoothness gate failed; needs "Allow heavy skins" on the TV)'
+    : `${b.tier}${b.estimate ? ' (estimate)' : ''}`;
   console.log(`  Score ${b.score ?? '—'}/100 vs ${b.referenceSkin} · tier ${tier}\n`);
 }
 
@@ -601,7 +616,7 @@ async function cmdBench(arg) {
   const dir = skinDir(arg);
   const b = await runBench(dir, { ...benchOptions(), log: opt.json ? () => {} : console.log });
   if (opt.json) console.log(JSON.stringify(b, null, 2)); else printBench(dir, b);
-  process.exitCode = b.gatesOk ? 0 : 1;
+  process.exitCode = b.estimate || b.tier ? 0 : 1; // Heavy is a result, not an error
 }
 
 if (opt.help || !cmd) usage(0);

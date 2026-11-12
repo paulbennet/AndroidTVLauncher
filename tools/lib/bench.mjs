@@ -7,6 +7,12 @@ import { PKG } from './adb.mjs';
 export const REFERENCE_SKIN = 'default';
 export const BENCH_APPS = 50;
 export const IDLE_SECONDS = 30;
+/**
+ * Rest after the tour before the idle window starts (plan revision R28, decision D24 b). A skin may move for up to
+ * LIVE_SECONDS after a key (fish, fire, falling rain), then it must rest; the idle gate measures the rest.
+ */
+export const LIVE_SECONDS = 20;
+export const IDLE_SETTLE_SECONDS = LIVE_SECONDS + 5;
 
 /**
  * Hard gates (plan: Budget). `tv` = only measurable on the TV.
@@ -14,12 +20,19 @@ export const IDLE_SECONDS = 30;
  * absolute value drifts with the TV's state (default's cold start ranged 1407–1919 ms in one day).
  */
 export const RELATIVE_LIMIT = 1.15;
+/**
+ * `smooth`: a smoothness gate (plan revision R27, decision D19 b). A skin that fails only these gets the tier
+ * "Heavy": it can stutter on a slow TV, and the launcher uses it only when "Allow heavy skins" is on. The other
+ * gates (idle frames, memory, cold start) protect the TV and stay hard: a skin that fails one has no tier.
+ */
+export const HEAVY_TIER = 'Heavy';
 export const GATES = [
   // Per input, not per frame (R14): one slow first frame per key is built into the VU31's WebView, and a share of
   // frames would punish skins that draw fewer frames (a skin without transitions measured 68–89%).
-  { metric: 'jankPerInput', label: 'Janky frames/input', limit: 1.5, unit: '', inclusive: true },
-  { metric: 'p95Ms', label: 'p95 frame', relative: RELATIVE_LIMIT, unit: 'ms', inclusive: true },
-  { metric: 'keyP95Ms', label: 'Key latency p95', limit: 50, unit: 'ms' },
+  { metric: 'jankPerInput', label: 'Janky frames/input', limit: 1.5, unit: '', inclusive: true, smooth: true },
+  // Rank-matched (R16): see p95Rank below.
+  { metric: 'p95Ms', label: 'p95 frame', relative: RELATIVE_LIMIT, unit: 'ms', inclusive: true, smooth: true },
+  { metric: 'keyP95Ms', label: 'Key latency p95', limit: 50, unit: 'ms', smooth: true },
   { metric: 'idleFps', label: 'Frames while idle', limit: 1, unit: '/s', inclusive: true, tv: true },
   { metric: 'pssMb', label: 'Total PSS', limit: 182, unit: 'MB', tv: true },
   { metric: 'firstFrameMs', label: 'First frame (cold)', relative: RELATIVE_LIMIT, unit: 'ms', inclusive: true, tv: true },
@@ -61,6 +74,21 @@ export function percentile(values, p) {
   if (!values.length) return null;
   const s = [...values].sort((a, b) => a - b);
   return s[Math.floor((s.length - 1) * p)];
+}
+
+/** The k-th slowest frame (k from 1). A skin that drew fewer than k frames: the missing frames cost 0 ms. */
+export function kthSlowest(frameMs, k) {
+  return [...frameMs].sort((a, b) => b - a)[k - 1] ?? 0;
+}
+
+/**
+ * Rank-matched p95 frame (plan revision R16, decision D17): both skins are judged by their k-th slowest frame, where
+ * k = 5% of the frames the reference drew. A plain p95 of the skin's own frames punished skins that draw few frames
+ * (Phosphor: 51 frames vs 146, so its p95 was one of the default skin's slowest few). Null without frame lists.
+ */
+export function p95Rank(refRuns) {
+  const n = median(refRuns.map(r => r.frameMs?.length).filter(Boolean));
+  return n ? Math.max(1, Math.ceil(n * 0.05)) : null;
 }
 
 const mean = xs => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null);
@@ -107,19 +135,36 @@ export function score(skin, ref, { estimate = false } = {}) {
   return Math.round(100 * Math.exp(mean(ratios.map(Math.log))));
 }
 
-export function tierFor(points, gatesOk) {
-  if (!gatesOk || points == null) return null;
+/** `hardOk` (default: same as gatesOk): no gate other than the smoothness ones failed. */
+export function tierFor(points, gatesOk, hardOk = gatesOk) {
+  if (!hardOk || points == null) return null;
+  if (!gatesOk) return HEAVY_TIER;
   return TIERS.find(t => points >= t.min).name;
 }
 
 /** Bench summary from the per-run metrics of the skin and the reference skin. */
 export function summarize({ skinRuns, refRuns, estimate }) {
-  const skin = medianMetrics(skinRuns);
-  const reference = medianMetrics(refRuns);
+  const k = p95Rank(refRuns);
+  const ranked = runs => runs.map(({ frameMs, ...r }) => (k && Array.isArray(frameMs) ? { ...r, p95OwnMs: r.p95Ms, p95Ms: kthSlowest(frameMs, k) } : r));
+  const skin = medianMetrics(ranked(skinRuns));
+  const reference = medianMetrics(ranked(refRuns));
   const gates = checkGates(skin, { estimate, reference });
   const gatesOk = gates.every(g => g.ok !== false);
+  const hardOk = gates.every(g => g.ok !== false || g.smooth);
   const points = score(skin, reference, { estimate });
-  return { skin, reference, gates, gatesOk, score: points, tier: tierFor(points, gatesOk) };
+  return { skin, reference, gates, gatesOk, hardOk, score: points, tier: tierFor(points, gatesOk, hardOk), p95Rank: k };
+}
+
+/**
+ * A saved `lx bench --json` result, scored again with today's gates and tiers (`lx pack --from`). The runs stay as
+ * measured; only the verdict follows the current rules. Throws when the file has no runs.
+ */
+export function rescore(saved) {
+  const d = saved && saved.runsDetail;
+  if (!d || !Array.isArray(d.skin) || !Array.isArray(d.reference) || !d.skin.length || !d.reference.length) {
+    throw new Error('not an `lx bench --json` result: runsDetail.skin and runsDetail.reference are missing');
+  }
+  return { ...saved, notes: [...(saved.notes || [])], ...summarize({ skinRuns: d.skin, refRuns: d.reference, estimate: !!saved.estimate }) };
 }
 
 // ---------------------------------------------------------------- TV (ADB)
@@ -200,6 +245,7 @@ export async function tvRun(tv, id, { log = () => {}, detail = false } = {}) {
   const perInput = jankPerInput(frameRows);
   log(`    tour: ${tour.frames} frames, ${perInput} janky per input (${round(tour.jankPct)}%), ${keys.length} keys`);
 
+  await sleep(IDLE_SETTLE_SECONDS * 1000); // motion after the last key ends first (R28)
   tv.run(['logcat', '-c']);
   tv.shell(`${START} --es frameStats start`);
   await sleep(IDLE_SECONDS * 1000);
@@ -207,6 +253,7 @@ export async function tvRun(tv, id, { log = () => {}, detail = false } = {}) {
   const idle = JSON.parse(await waitLog(tv, 'FRAME_STATS', 5000) || '{}');
 
   return {
+    frameMs: frameRows.map(r => r[1]), // for the rank-matched p95 (R16)
     jankPerInput: perInput, jankPct: tour.jankPct ?? null, p95Ms: tour.p95Ms ?? null, p99Ms: tour.p99Ms ?? null, frames: tour.frames ?? 0,
     keyP95Ms: percentile(keys, 0.95), idleFps: round((idle.frames ?? 0) / IDLE_SECONDS, 2),
     pssMb: round(pssMb(tv)), firstFrameMs: s.processToFirstFrameMs ?? null,

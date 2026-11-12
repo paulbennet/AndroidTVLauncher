@@ -28,7 +28,9 @@ test('bad fixture fails with the expected rules', { timeout: 60000 }, async () =
   const { code, r } = await lint('tools/test/fixtures/bad-skin');
   assert.equal(code, 1);
   const got = new Set(r.errors.map(e => e.rule));
-  for (const rule of ['backdrop-filter', 'transition-all', 'animated-paint', 'external-url', 'will-change', 'idle-animation', 'external-load'])
+  // external-load (a CSP block at render time) no longer fires for CSS url(): the core drops URLs outside the package
+  // before any request (skins.js absoluteUrls); the static external-url rule still reports them.
+  for (const rule of ['backdrop-filter', 'transition-all', 'animated-paint', 'external-url', 'will-change', 'idle-animation'])
     assert.ok(got.has(rule), `missing ${rule}; got ${[...got]}`);
 });
 

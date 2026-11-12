@@ -77,9 +77,9 @@ with 50 reference apps, 3 or more runs; 2026-11-09 to 2026-11-10):
 | Cold start, process → first frame | 1.39–1.56 s | ≤ 1.15 × default |
 | Total PSS (app + WebView renderer) | 144–150 MB | < 182 MB |
 | Janky frames per key | 1.06–1.13 | ≤ 1.5 |
-| p95 frame during the focus tour | 31–32 ms | ≤ 1.15 × default |
+| p95 frame during the focus tour (rank-matched, R26) | 31–32 ms | ≤ 1.15 × default |
 | Key latency p95 | 23 ms | < 50 ms |
-| Frames drawn while idle | 0.13 per second | ≤ 1 per second |
+| Frames drawn while idle (from 25 s after the last key, R28) | 0.13 per second | ≤ 1 per second |
 
 For comparison, Google TV's own home used about 136 MB on the same TV (home 105 MB + coreservices 31 MB), and it
 stays in memory; this launcher frees its WebView after 60 s hidden and ends its process after 2 minutes (above).

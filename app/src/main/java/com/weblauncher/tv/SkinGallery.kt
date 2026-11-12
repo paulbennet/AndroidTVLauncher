@@ -113,7 +113,7 @@ class SkinGallery(private val installer: SkinInstaller, private val skins: SkinS
         private const val MAX_CACHED_PREVIEWS = 6
         private val VERSION = Regex("^[0-9A-Za-z.+-]{1,20}$")
         private val SHA256 = Regex("^[0-9a-f]{64}$")
-        private val TIERS = setOf("Lite", "Standard", "Rich")
+        private val TIERS = setOf("Lite", "Standard", "Rich", "Heavy")
 
         /** Magic bytes; the content type the server sent is not trusted. */
         fun imageType(b: ByteArray): String? = when {

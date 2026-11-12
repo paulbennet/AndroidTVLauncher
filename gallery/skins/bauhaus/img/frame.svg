@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="none">
+  <!-- Bauhaus "Frame" composition (option): flat shapes around the edges, the middle stays empty for the UI. -->
+  <g id="left">
+    <path d="M35 0 H225 A190 185 0 0 1 35 185 Z" fill="#D3311F"/>
+    <rect x="35" y="185" width="65" height="495" fill="#151515"/>
+    <path d="M100 190 L287 370 H100 Z" fill="#F2B33D"/>
+    <path d="M100 370 A152 157 0 0 1 100 683 Z" fill="#1D4F91"/>
+    <circle cx="0" cy="1080" r="378" fill="#F2B33D"/>
+  </g>
+  <g id="bottom">
+    <path d="M400 1005 A242 210 0 0 1 885 1005 Z" fill="#D3311F"/>
+    <path d="M885 1005 L1138 765 V1005 Z" fill="#1D4F91"/>
+    <path d="M1140 1005 A152 145 0 0 1 1445 1005 Z" fill="#F2B33D"/>
+    <rect x="378" y="1005" width="1120" height="75" fill="#151515"/>
+  </g>
+  <g id="right">
+    <rect x="1470" y="0" width="450" height="90" fill="#1D4F91"/>
+    <circle cx="1810" cy="204" r="112" fill="#F2B33D"/>
+    <path d="M1890 318 V538 H1663 Z" fill="#D3311F"/>
+    <path d="M1773 730 A195 175 0 0 0 1773 1080 Z" fill="#151515"/>
+    <rect x="1773" y="633" width="147" height="447" fill="#D3311F"/>
+  </g>
+</svg>

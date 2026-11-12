@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="skin.css">
+  <script type="module" src="skin.js"></script>
+</head>
+<body>
+  <div class="floor" aria-hidden="true"></div>
+  <!-- Caustic light (three.js shader, water.js): a still picture, drawn when the focus rests; the canvas is for "Living water". -->
+  <div class="caustics" aria-hidden="true"><canvas></canvas></div>
+  <div class="water-tint" aria-hidden="true"></div>
+
+  <section class="hero">
+    <div class="hero-text"><div class="kicker"></div><div class="title"></div><div class="hint">OK to open · hold OK for more</div></div>
+    <div class="hero-art"><img alt="" decoding="async"><div class="mono"></div></div>
+  </section>
+  <div class="bubble"><div class="time">--:--</div><div class="date"></div></div>
+
+  <main>
+    <h2>Favourites</h2>
+    <div class="row favs" data-list="favourites"></div>
+    <h2>All apps</h2>
+    <div class="row apps" data-list="apps"></div>
+  </main>
+
+  <footer><div class="pills"></div></footer>
+</body>
+</html>

@@ -48,10 +48,22 @@ function getJson(url) {
 // serves core.css unlayered too, and the skin sheet, adopted after it, still wins selectors of equal weight.
 export const LAYERS = typeof CSSLayerBlockRule !== 'undefined';
 
+/** Relative url() → absolute inside the skin package. Constructed sheets resolve url() against the document, not
+ *  their baseURL (seen in Chromium 156 and WebView), so fonts and images of level 1–2 skins were 404s. A path that
+ *  would leave the package is dropped. */
+export function absoluteUrls(cssText, baseURL) {
+  return cssText.replace(/url\(\s*(['"]?)([^'")]+)\1\s*\)/g, (m, q, path) => {
+    if (/^(data:|#)/i.test(path)) return m;
+    let abs;
+    try { abs = new URL(path, baseURL).href; } catch { return 'none'; }
+    return abs.startsWith(baseURL) ? `url("${abs}")` : 'none';
+  });
+}
+
 function layeredSheet(cssText, baseURL) {
   const probe = new CSSStyleSheet({ baseURL });
   probe.replaceSync(cssText); // @import is ignored by replaceSync
-  const rules = Array.from(probe.cssRules, r => r.cssText).join('\n');
+  const rules = absoluteUrls(Array.from(probe.cssRules, r => r.cssText).join('\n'), baseURL);
   const sheet = new CSSStyleSheet({ baseURL });
   sheet.replaceSync(LAYERS ? `@layer skin {\n${rules}\n}` : rules);
   return { sheet, rules: probe.cssRules.length };

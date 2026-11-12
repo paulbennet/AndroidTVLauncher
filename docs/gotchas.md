@@ -70,10 +70,25 @@ Android 14) and the Android TV 12 emulator; other TVs may differ.
 - **Desktop numbers don't predict the TV.** rAF intervals and key latency on a PC say little; only the render time
   agrees roughly.
 - **`atrace` needs a small buffer** (`-b 4096`) on a 2 GB TV.
+- **Single TV runs vary a lot.** The same Paper Cut build measured 1.4 and 2.1 janky frames per input. Decide with
+  3-run medians (`--runs 3`); use one run only to spot big effects.
+- **Read the frame stages** (`frameRows` in the bench detail: `at,total,deadline,gpu,…,issue,swap`). In WebView,
+  "issue" holds the page's compositor and GPU raster. A median "issue" of ~15 ms with a 50 ms deadline means every
+  frame misses its budget; the default skin is at ~6 ms with a 33 ms deadline.
+- **Costs add up to a cliff.** Past the frame budget the rate falls from 30 to 20 frames a second, so removing one
+  element can show no effect until the total is under the cliff. Bisect from a fast, stripped page and add parts
+  back one at a time.
+- **Desktop traces miss these TV costs** (translucent moving tiles, per-corner radii, full-screen canvases): check
+  on the TV.
 - **Package stubs:** `cmd package resolve-activity` can say "No activity found" for `OPEN_DOCUMENT` while the app's
   own query finds Android TV's stub (`frameworkpackagestubs`). Filter it out.
 
 ## Skins
+- **Constructed stylesheets resolve url() against the document, not their baseURL** (Chromium 156, WebView). The loader
+  (`core/skins.js` `absoluteUrls`) makes relative url() paths absolute inside the skin package; before that, fonts and
+  images in level 1–2 skin CSS were 404s and silently fell back.
+- A positioned element with a negative z-index paints under the body background: put decorative full-screen layers on
+  `lx-root::before` (z-index 0) rather than relying on `lx-bg` under a skin that colours `body`.
 - A skin id equal to a bundled one (`default`, `minimal`, `marquee`, `shelf`) fails lint (`reserved-id`).
 - Choice option values must be name tokens (`p1`, not `1`).
 - The core moves focus with a direction cone (`pick()`): put focusable items where a direction can reach them.
@@ -81,6 +96,14 @@ Android 14) and the Android TV 12 emulator; other TVs may differ.
 - In level 3, every move is a postMessage round trip: keep the work per focus change small. The Shelf showcase is
   at 43 ms key latency, near the 50 ms gate.
 - The first focus can come before a banner image is decoded: read colours from it again on `load`.
+- three.js: `new Color('#hex')` converts to linear. A `ShaderMaterial` that writes colours straight out then looks too
+  dark; pass raw sRGB numbers (`new Color(r / 255, g / 255, b / 255)`).
+- To draw WebGL once and keep it still, render, `drawImage` the GL canvas into a 2D canvas, then `dispose()` and
+  `forceContextLoss()`: no GL context stays alive and nothing draws at rest.
+- Any visible `<canvas>` is a GPU layer on every frame. For a still WebGL picture, `toBlob()` it and show the blob URL
+  as a CSS background image. WebP is encoded off the main thread; PNG is encoded in main-thread idle time.
+- Redraw an ambient picture (for example light tinted by the focused app) when the focus rests (~600 ms), not per
+  key: a picture that lands during a focus move costs that move's frames.
 - An editor that saves through a temporary file (for example `sed -i`) can make `lx dev` see that file for a moment.
 
 ## Development

@@ -1,0 +1,95 @@
+/* Tidepool: positions follow the 1920×1080 release art; 1rem = 16 design px. Glass without blur: translucent
+   fills and thin rims over a still sea floor. Focus changes transform/opacity only. */
+@font-face { font-family: "Manrope"; font-weight: 500; src: url("fonts/manrope-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "Manrope"; font-weight: 800; src: url("fonts/manrope-latin-800-normal.woff2") format("woff2"); }
+
+:root {
+  --text: #EAFBFF; --dim: #9FD3DB; --cyan: #5FF2E0; --coral: #FF6F61;
+  --glass: linear-gradient(160deg, rgba(60, 170, 175, 0.30), rgba(8, 50, 62, 0.42)); --rim: rgba(170, 255, 240, 0.32);
+  /* Pebbles move, so they are opaque: the same glass pre-mixed over the sea floor. On the VU31 a translucent moving
+     element cost ~15 ms of compositor time on every frame (opaque: ~6 ms, like the default skin). */
+  --glass-solid: linear-gradient(160deg, #19565E, #09323D); --rim-solid: #3F8487;
+}
+* { box-sizing: border-box; }
+html { font-size: calc(100vw / 120); }
+html, body { margin: 0; height: 100%; overflow: hidden; user-select: none; }
+body { position: relative; background: #031B26; color: var(--text); font-family: "Manrope", system-ui, sans-serif; font-weight: 800; }
+
+.floor { position: absolute; inset: 0; background: #031B26 url("img/seafloor.webp") center / cover no-repeat; }
+/* water.js bakes the caustic light into the floor picture (.floor background image). The canvas is only for
+   "Living water": a live canvas, a GPU layer. */
+.caustics { position: absolute; inset: 0; display: none; }
+.caustics.live { display: block; }
+.caustics canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.water-tint { position: absolute; inset: 0; pointer-events: none; }
+html[data-opt-water="shallow"] .water-tint { background: linear-gradient(180deg, rgba(30, 170, 170, 0.32), rgba(10, 120, 120, 0.18)); }
+
+/* ---------- hero: the focused app ---------- */
+.hero {
+  position: absolute; left: 4.4rem; top: 3.75rem; width: 81.6rem; height: 15.4rem; border-radius: 7.7rem;
+  /* Opaque and without a blurred drop shadow: the hero re-rasters on every key, and a translucent one cost ~7 ms
+     more per frame. */
+  background: var(--glass-solid); border: 0.12rem solid var(--rim-solid); box-shadow: inset 0 0.2rem 0 rgba(255, 255, 255, 0.12);
+  display: flex; align-items: center; justify-content: space-between; padding: 0 2.2rem 0 5.6rem; gap: 2rem;
+}
+.hero-text { min-width: 0; display: flex; flex-direction: column; gap: 0.3rem; }
+.kicker { font-size: 1.1rem; letter-spacing: 0.28rem; color: var(--cyan); font-weight: 500; min-height: 1.3rem; }
+.title { font-size: 7.2rem; line-height: 1; letter-spacing: -0.15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hint { font-size: 1.5rem; color: var(--dim); font-weight: 500; }
+.hero-art { flex: 0 0 auto; width: 20rem; height: 11.25rem; border-radius: 4.8rem; background: rgba(255, 255, 255, 0.06); display: flex; align-items: center; justify-content: center; }
+.hero-art img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; } /* radius on the image, no clip */
+.hero-art.icon img { width: auto; height: 70%; object-fit: contain; border-radius: 0; }
+.hero-art .mono { font-size: 4rem; color: var(--dim); }
+.hero.empty .hero-art { opacity: 0; }
+
+/* ---------- clock bubble ---------- */
+.bubble {
+  position: absolute; right: 6.5rem; top: 3.4rem; width: 16rem; height: 16rem; border-radius: 50%;
+  border: 0.2rem solid rgba(180, 255, 245, 0.5); background: radial-gradient(circle at 35% 30%, rgba(200, 255, 250, 0.16), rgba(3, 27, 38, 0.35) 70%);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.2rem;
+}
+.time { font-size: 4.6rem; line-height: 1; color: var(--coral); letter-spacing: -0.1rem; white-space: nowrap; }
+.time.long { font-size: 3.1rem; }
+.date { font-size: 1.3rem; color: var(--dim); font-weight: 500; }
+
+/* ---------- rows of glass pebbles ---------- */
+main { position: absolute; left: 0; right: 0; top: 20.6rem; }
+h2 { margin: 0 0 0 6rem; font-size: 1.15rem; letter-spacing: 0.3rem; text-transform: uppercase; color: var(--cyan); font-weight: 500; }
+.row { display: flex; gap: 2rem; padding: 1.6rem 6rem 3.6rem; overflow: hidden; }
+.pebble {
+  position: relative; flex: 0 0 auto; width: 23rem; height: 12.6rem; padding: 1rem;
+  /* One radius for all four corners (it varies per app): different corners make a "complex" shape that the VU31 draws
+     as a path, ~8 ms more on every frame of a focus move. */
+  border-radius: var(--r1) / 50%;
+  background: var(--glass-solid); border: 0.12rem solid var(--rim-solid);
+  transition: transform 160ms cubic-bezier(.2, .8, .2, 1); scroll-margin: 6rem;
+}
+.pebble::after { /* cyan rim + a soft outer rim (no blur: a blurred glow re-rasters), faded in on focus */
+  content: ""; position: absolute; inset: -0.3rem; border-radius: inherit; border: 0.3rem solid var(--cyan);
+  outline: 0.5rem solid rgba(95, 242, 224, 0.22); opacity: 0; /* no fade: every fade is one more animated layer */
+}
+/* The radius is on the image, not a clip on .art: overflow hidden + radius adds a mask layer (docs/design-rules.md). */
+.pebble .art { width: 100%; height: 100%; border-radius: inherit; display: flex; align-items: center; justify-content: center; }
+.pebble .art img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
+.pebble .art:not(.banner) img { width: auto; height: 62%; object-fit: contain; border-radius: 0; }
+.pebble .art.mono { font-size: 3.4rem; color: var(--dim); }
+.pebble .name {
+  position: absolute; left: 0; right: 0; top: calc(100% + 0.6rem); text-align: center; font-size: 1.6rem; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0;
+}
+/* Lift only, no zoom: a zoom re-rasters the whole pebble (and its glow) when it ends. */
+.pebble[focused] { transform: translateY(-1rem); z-index: 2; }
+.pebble[focused]::after, .pebble[focused] .name { opacity: 1; }
+.pebble[data-moving]::after { opacity: 1; border-style: dashed; }
+.row.apps .pebble { width: 17rem; height: 9.4rem; }
+
+/* ---------- inputs and settings: glass pills ---------- */
+footer { position: absolute; left: 0; right: 0; bottom: 5.6rem; display: flex; justify-content: center; }
+.pills { display: flex; gap: 1.8rem; }
+.pill {
+  height: 5rem; padding: 0 2.6rem; border-radius: 2.5rem; display: flex; align-items: center; gap: 0.8rem;
+  background: var(--glass-solid); border: 0.12rem solid var(--rim-solid); font-size: 2.2rem; color: var(--text); transition: transform 160ms ease-out;
+}
+.pill:not([data-connected]):not(.gear) { color: var(--dim); }
+.pill svg { width: 2.4rem; height: 2.4rem; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+.pill[focused] { transform: scale(1.08); background: var(--cyan); color: #04323A; border-color: transparent; }

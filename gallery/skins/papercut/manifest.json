@@ -1,0 +1,18 @@
+{
+  "id": "papercut",
+  "name": "Paper Cut",
+  "version": "1.0.0",
+  "apiVersion": 1,
+  "level": 3,
+  "author": "Web TV Launcher",
+  "description": "A hand-made paper diorama: layered paper hills (three.js) that follow the time of day, pinned paper cards for your apps, and optional depth motion.",
+  "entry": "skin.html",
+  "options": [
+    { "id": "time", "type": "choice", "label": "Time of day", "default": "auto",
+      "choices": [{ "value": "auto", "label": "Follow the clock" }, { "value": "day", "label": "Day" }, { "value": "dusk", "label": "Dusk" }, { "value": "night", "label": "Night" }] },
+    { "id": "birds", "type": "toggle", "label": "Paper birds", "default": true },
+    { "id": "depth", "type": "toggle", "label": "Depth motion (layers slide; smooth on fast TVs only)", "default": false },
+    { "id": "grain", "type": "choice", "label": "Paper grain", "default": "strong",
+      "choices": [{ "value": "strong", "label": "Strong" }, { "value": "soft", "label": "Soft" }] }
+  ]
+}

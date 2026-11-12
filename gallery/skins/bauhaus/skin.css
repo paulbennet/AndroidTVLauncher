@@ -1,0 +1,93 @@
+/* Bauhaus (level 2): a poster grid on cream paper. Positions follow the 1920×1080 release art; 1rem = 20 design px.
+   Focus changes only transform/opacity plus one instant shadow on the focused block; nothing moves at rest. */
+@font-face { font-family: "Jost"; font-weight: 500; src: url("fonts/jost-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "Jost"; font-weight: 800; src: url("fonts/jost-latin-800-normal.woff2") format("woff2"); }
+
+:root { --paper: #F1EADB; --ink: #151515; --red: #D3311F; --blue: #1D4F91; --yellow: #F2B33D; --on-blue: #F1EADB; }
+html[data-opt-palette="blackred"] { --paper: #EDE6D8; --ink: #111111; --red: #C8261A; --blue: #111111; --yellow: #C8261A; }
+html[data-opt-palette="bluenight"] { --paper: #13213D; --ink: #F1EADB; --red: #E2553F; --blue: #5B8FD6; --yellow: #F2B33D; --on-blue: #13213D; }
+
+html, body { background: var(--paper); color: var(--ink); }
+lx-bg { background: var(--paper); }
+/* Frame composition: the shapes sit on a fixed layer under the (scaled) poster. */
+html[data-opt-composition="frame"] lx-root::before {
+  content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none; background: url("img/frame.svg") center / 100% 100% no-repeat;
+}
+lx-root { font-weight: 800; text-transform: uppercase; }
+#poster { position: absolute; inset: 0; display: block; z-index: 1; }
+html[data-opt-composition="frame"] #poster { transform: translate(1rem, -3.5rem) scale(0.72); transform-origin: 52% 45%; }
+
+/* The focused app, set vertically along the left edge. */
+#vname { position: absolute; left: 1rem; top: 1rem; width: 7.5rem; height: 44rem; padding: 0; min-height: 0; display: block; overflow: hidden; }
+#vname .lx-hero-art { display: none; }
+#vname .lx-hero-title {
+  position: absolute; left: 0; bottom: 0; transform-origin: left bottom; transform: translateY(-7.5rem) rotate(-90deg) translateY(7.5rem);
+  width: 44rem; font-size: 5.8rem; line-height: 7.5rem; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: clip;
+}
+
+/* The giant clock over a red circle; the date stacked on the right. */
+#bigclock { position: absolute; left: 11.5rem; top: 0; width: 55rem; height: 25rem; }
+#bigclock::before { content: ""; position: absolute; left: 12rem; top: -6rem; width: 34.5rem; height: 34.5rem; border-radius: 50%; background: var(--red); }
+/* 16rem fits a 12 h time ("12:50 AM") in the same space as a 24 h one; the TV chooses the format. */
+#bigclock .lx-time { position: relative; font-size: 14.5rem; font-weight: 800; line-height: 1; letter-spacing: -0.7rem; color: var(--ink); margin-top: 5.5rem; white-space: nowrap; }
+#bigclock .lx-date {
+  position: absolute; left: 61rem; top: 4rem; width: 22rem; margin: 0; color: var(--ink);
+  font-size: 3.4rem; font-weight: 800; line-height: 1.05; letter-spacing: -0.05rem;
+}
+#set {
+  position: absolute; right: 2.4rem; top: 21rem; padding: 0.5rem 1.2rem; border-radius: 0;
+  background: var(--ink); color: var(--paper); font-size: 1.4rem; font-weight: 800; letter-spacing: 0.15rem;
+}
+#set[focused] { background: var(--red); color: var(--paper); transform: translate(-0.3rem, -0.3rem); box-shadow: 0.3rem 0.3rem 0 var(--ink); }
+
+/* Favourites: big square colour blocks, one shape each; the row scrolls past 4. */
+#favs { position: absolute; left: 10.25rem; top: 25.5rem; width: 69rem; margin: 0; }
+#favs > .lx-title { display: none; }
+#favs lx-row { gap: 1.1rem; padding: 1.4rem 2rem 2rem 1.2rem; margin: -1.4rem -2rem -2rem -1.2rem; }
+#favs lx-row > lx-tile { flex: 0 0 15.8rem; aspect-ratio: 1; border-radius: 0; background: var(--blue); color: var(--on-blue); transition: transform 120ms ease-out; }
+#favs lx-row > lx-tile:nth-child(4n+1) { background: var(--red); color: var(--paper); }
+#favs lx-row > lx-tile:nth-child(4n+3) { background: var(--yellow); color: var(--ink); }
+#favs lx-tile .lx-banner, #favs lx-tile .lx-icon-wrap { display: none; }
+/* The shape (circle, half circle, triangle, bar) and the name. */
+#favs lx-tile::before { content: ""; position: absolute; left: 50%; top: 1.8rem; width: 8.4rem; height: 8.4rem; margin-left: -4.2rem; background: var(--paper); border-radius: 50%; }
+#favs lx-tile:nth-child(4n+2)::before { border-radius: 8.4rem 8.4rem 0 0; height: 4.2rem; top: 4.2rem; }
+#favs lx-tile:nth-child(4n+3)::before { border-radius: 0; background: var(--ink); clip-path: polygon(50% 0, 100% 100%, 0 100%); height: 7.4rem; top: 1.8rem; }
+#favs lx-tile:nth-child(4n+4)::before { border-radius: 0; height: 2.4rem; width: 11.6rem; margin-left: -5.8rem; top: 4.2rem; }
+#favs lx-tile::after {
+  content: attr(aria-label); inset: auto 0.6rem 1.2rem; box-shadow: none; opacity: 1; text-align: center; color: inherit;
+  font-size: 2.3rem; line-height: 1; letter-spacing: -0.05rem; overflow: hidden; border-radius: 0;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+}
+#favs lx-tile[focused] { transform: translate(-0.7rem, -0.7rem); box-shadow: 1.4rem 1.4rem 0 var(--ink); }
+#favs lx-tile[moving] { outline: 0.3rem dashed var(--ink); outline-offset: 0.4rem; }
+
+/* All apps: a ruled typographic list on the right. */
+#list { position: absolute; left: 81rem; top: 25rem; width: 14.4rem; height: 21rem; padding: 0 0 2rem; overflow-y: auto; }
+#apps { margin: 0; }
+#apps > .lx-title { display: none; }
+#apps lx-grid { gap: 0; }
+#apps lx-tile {
+  aspect-ratio: auto; height: 4.6rem; border-radius: 0; background: none; border-bottom: 0.15rem solid var(--ink);
+  display: flex; align-items: center; padding: 0 0.4rem; font-size: 1.9rem; line-height: 1; transition: none;
+}
+#apps lx-tile::before { content: attr(aria-label); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#apps lx-tile .lx-banner, #apps lx-tile .lx-icon-wrap { display: none; }
+#apps lx-tile::after { content: none; }
+#apps lx-tile[fav] .lx-fav-dot { display: none; }
+#apps lx-tile[focused] { transform: none; background: var(--ink); color: var(--paper); }
+
+/* TV inputs: a black bar along the bottom. */
+#bar { position: absolute; left: 0; right: 0; bottom: 0; height: 6.8rem; margin: 0; background: var(--ink); color: var(--paper); display: flex; align-items: center; }
+#bar > .lx-title { font-size: 4.2rem; font-weight: 800; margin: 0 2.4rem 0 3.6rem; color: var(--paper); letter-spacing: 0.1rem; }
+#bar .lx-count { display: none; }
+#bar lx-row { gap: 0.8rem; padding: 0; margin: 0; flex: 1; align-items: center; }
+#bar lx-row > lx-tile {
+  flex: 0 0 auto; aspect-ratio: auto; height: 5.4rem; padding: 0 2rem; border-radius: 0; background: none; color: var(--paper);
+  display: flex; align-items: center; font-size: 4.2rem; transition: none;
+}
+#bar lx-tile::before { content: attr(aria-label); white-space: nowrap; }
+#bar lx-tile .lx-icon-wrap, #bar lx-tile .lx-input-icon { display: none; }
+#bar lx-tile::after { content: none; }
+#bar lx-tile[focused] { transform: none; background: var(--yellow); color: var(--ink); }
+html[data-opt-palette="bluenight"] #bar, html[data-opt-palette="bluenight"] #bar lx-row > lx-tile { color: #13213D; }
+html[data-opt-palette="bluenight"] #bar > .lx-title { color: #13213D; }

@@ -1,0 +1,97 @@
+/* Paper Cut: positions follow the 1920×1080 release art; 1rem = 16 design px. Paper sheets are bitmaps painted once
+   (hills.js); focus changes transform/opacity only. No blur, no filters. */
+@font-face { font-family: "Fraunces"; font-weight: 600; src: url("fonts/fraunces-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "Fraunces"; font-weight: 800; src: url("fonts/fraunces-latin-800-normal.woff2") format("woff2"); }
+
+:root {
+  --sky0: #9AD3EF; --sky1: #BFE4F4; --ink: #1E2F45; --ink-dim: rgba(30, 47, 69, 0.72);
+  --sun: #F7D96A; --sun-shade: #E9B84A; --tree: #2E6B3A; --paper: #FBF6EC; --pin: #9AA3AD; --terra: #C8553D;
+}
+html[data-tod="dusk"] { --sky0: #E8836F; --sky1: #F4A58A; --ink: #2A1F3D; --ink-dim: rgba(42, 31, 61, 0.72); --sun: #F7A43C; --sun-shade: #DE8A2A; --tree: #5E3F55; }
+html[data-tod="night"] { --sky0: #1A3364; --sky1: #26457C; --ink: #F4EFE2; --ink-dim: rgba(244, 239, 226, 0.74); --sun: #D9DCE0; --sun-shade: #B9BEC6; --tree: #16284A; --paper: #EFE8DA; }
+
+* { box-sizing: border-box; }
+html { font-size: calc(100vw / 120); }
+html, body { margin: 0; height: 100%; overflow: hidden; user-select: none; }
+body {
+  position: relative; color: var(--ink); font-family: "Fraunces", Georgia, serif; font-weight: 600;
+  background: linear-gradient(180deg, var(--sky0), var(--sky1) 70%);
+}
+
+/* ---------- the diorama: three layers that slide by different amounts ---------- */
+.scene { position: absolute; inset: 0; pointer-events: none; background: 0 0 / 100% 100% no-repeat; }
+.flat .layer { visibility: hidden; } /* the scene's background image (skin.js flatten) shows them instead */
+.layer { position: absolute; inset: -2rem; }
+/* Depth motion is opt-in: on the VU31 (Mali-G31) sliding full-screen layers ran at ~9 frames a second. */
+html[data-opt-depth="on"] .layer { transition: transform 600ms cubic-bezier(.2, .7, .2, 1); will-change: transform; }
+.layer canvas { position: absolute; left: 0; bottom: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 400ms ease; } /* height: only the hill band (hills.js) */
+.hills-ready .layer canvas { opacity: 1; }
+.layer svg { position: absolute; left: 2rem; top: 2rem; width: 100vw; height: 100vh; }
+.sun { fill: var(--sun); stroke: var(--sun-shade); stroke-width: 10; }
+.birds path { fill: var(--paper); stroke: rgba(30, 47, 69, 0.25); stroke-width: 2; }
+.stars circle { fill: #F4EFE2; }
+.moon-cut { fill: #1C3668; display: none; } /* the night sky gradient at the moon's height */
+html[data-tod="night"] .moon-cut { display: inline; }
+.stars, html[data-tod="night"] .birds, html[data-opt-birds="off"] .birds { display: none; }
+html[data-tod="night"] .stars { display: inline; }
+.trees path { fill: var(--tree); }
+
+/* ---------- clock, greeting, the focused name ---------- */
+header { position: absolute; left: 6rem; top: 3rem; right: 36rem; }
+.time { font-size: 8.8rem; line-height: 1; font-weight: 800; letter-spacing: -0.2rem; white-space: nowrap; }
+.greet { margin-top: 0.6rem; font-size: 1.9rem; color: var(--ink-dim); white-space: nowrap; }
+.title { margin-top: 1.4rem; font-size: 5.4rem; line-height: 1.05; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-height: 5.7rem; }
+.hint { margin-top: 0.4rem; font-size: 1.5rem; color: var(--ink-dim); }
+
+/* ---------- pinned paper cards ---------- */
+main { position: absolute; left: 0; right: 0; top: 28rem; }
+.row { display: flex; gap: 2.4rem; overflow: hidden; }
+.row.favs { padding: 1.8rem 6rem 1.6rem; }
+.row.apps { padding: 1.4rem 6rem 1.2rem; gap: 1.8rem; }
+.head { display: inline-block; margin: 0 0 0 6rem; padding: 0.35rem 1rem; font-size: 1.15rem; letter-spacing: 0.25rem; text-transform: uppercase; color: #3A3328; background: #F7F0E2; transform: rotate(-1.5deg); }
+.card {
+  position: relative; flex: 0 0 auto; width: 26rem; height: 15.6rem;
+  transform: rotate(var(--tilt)); transition: transform 180ms cubic-bezier(.2, .8, .2, 1); scroll-margin: 6rem;
+}
+/* Shadows are plain offset shapes, not box-shadow: on tilted cards a box-shadow cost ~40× the raster time. Only the
+   card itself animates; shadow, pin and outline change at once (each animated part is one more layer per key). */
+.card::before {
+  content: ""; position: absolute; inset: 0; border-radius: 0.25rem; background: rgba(20, 20, 30, 0.22);
+  transform: translate(0.3rem, 0.45rem);
+}
+.face { position: relative; height: 100%; padding: 0.7rem; border-radius: 0.25rem; background: var(--paper); }
+.card .art { position: relative; width: 100%; height: 100%; overflow: hidden; border-radius: 0.1rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.6rem; background: #E9E1D1; color: #3A3328; }
+.card .art img { width: 100%; height: 100%; object-fit: cover; }
+.card .art:not(.banner) img { width: auto; height: 50%; object-fit: contain; }
+.card .art.mono { font-size: 3.6rem; font-weight: 800; }
+.card .name { font-size: 1.5rem; max-width: 90%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pin { position: absolute; left: 50%; top: -0.55rem; width: 1.4rem; height: 1.4rem; margin-left: -0.7rem; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff 0 12%, var(--pin) 40%, #5C636B); }
+.pin::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff 0 12%, var(--terra) 40%, #7E2E1F); opacity: 0; }
+/* Lift and stand straight, no zoom: a zoom re-rasters the whole card when it ends (cost grows with card area). */
+.card[focused] { transform: translateY(-1.2rem); z-index: 2; }
+.card[focused] .face { outline: 0.35rem solid #FFFDF7; outline-offset: 0.3rem; }
+.card[focused]::before { transform: translate(0.8rem, 1.3rem); background: rgba(20, 20, 30, 0.28); }
+.card[focused] .pin::after { opacity: 1; }
+.card[data-moving] .face { outline: 0.35rem dashed var(--terra); outline-offset: 0.3rem; }
+.row.apps .card { width: 14.4rem; height: 8.1rem; }
+.row.apps .face { padding: 0.45rem; }
+.row.apps .card .art.mono { font-size: 2.2rem; }
+.row.apps .card .name { font-size: 1.05rem; }
+.row.apps .card[focused] { transform: translateY(-0.7rem); }
+.row.apps .pin { width: 1rem; height: 1rem; margin-left: -0.5rem; top: -0.4rem; }
+
+/* ---------- inputs and Settings: taped paper labels ---------- */
+footer { position: absolute; left: 6rem; right: 6rem; bottom: 2.2rem; }
+.labels { display: flex; gap: 1.6rem; }
+.tag {
+  position: relative; height: 4.4rem; padding: 0 2.6rem; display: flex; align-items: center; font-size: 1.9rem; color: #3A3328;
+  background: linear-gradient(180deg, #F7F0E2 85%, #E2D7C2); transform: rotate(-1deg); transition: transform 140ms ease-out;
+}
+/* A strip of tape instead of torn clip-path edges: the clip-path made every frame re-raster the page (~30×). */
+.tag::after { content: ""; position: absolute; left: 50%; top: -0.7rem; width: 4.4rem; height: 1.4rem; margin-left: -2.2rem; background: rgba(255, 250, 235, 0.55); transform: rotate(-3deg); }
+.tag:nth-child(even) { transform: rotate(1deg); }
+.tag span { position: relative; }
+.tag::before { content: ""; position: absolute; inset: 0; background: var(--terra); opacity: 0; }
+.tag:not([data-connected]):not([data-action]) { color: rgba(58, 51, 40, 0.62); }
+.tag[focused] { transform: translateY(-0.5rem); color: #FFF8EE; }
+.tag[focused]::before { opacity: 1; }

@@ -15,6 +15,12 @@ pages rendered at 1920×1080. Rendering cost is Chromium raster/compositing on t
 | Effect | Measured cost on the VU31 |
 |---|---|
 | `backdrop-filter` / blur (glass panels) | 84 ms median frame, 32 fps |
+| A translucent fill on an element that moves (glass tiles) | ~15 ms compositor time on every frame of a focus move vs ~6 ms opaque (Tidepool, session 20). Pre-mix the glass colour over the background instead |
+| A different radius per corner (`a b c d / e f g h`) on an element that moves | ~14 ms vs ~7 ms per frame with one radius (elliptical `40% / 50%` is fine) |
+| A visible full-screen `<canvas>` (even a still one) | A GPU layer drawn on every frame, and the content painted above it needs layers too: ~+8 ms per frame. Show a still WebGL picture as a background image (`toBlob` → blob URL) |
+| `box-shadow` on a rotated element, `clip-path` on a label | Re-raster ~40× and ~30× (desktop trace); Paper Cut p95 frame 120 → 52 ms without them |
+| Sliding full-screen layers (parallax) | ~9 frames a second on Paper Cut: make it an opt-in "Depth motion" option |
+| A shader drawn on every frame for 600 ms after each key | 8.7 janky frames per input (Tidepool). Draw once, when the focus rests |
 | Animated `box-shadow` (glow, lift shadow) | 95 ms median, p95 642 ms, 16 fps |
 | Many simultaneous animations (300 tiles) | 66 ms median, 17 fps |
 | Full-screen WebGL shader / animated background | 69 ms median, 41 fps |

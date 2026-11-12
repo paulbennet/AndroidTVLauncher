@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { percentile, median, medianMetrics, checkGates, score, tierFor, summarize, jankPerInput } from '../lib/bench.mjs';
+import { percentile, median, medianMetrics, checkGates, score, tierFor, summarize, jankPerInput, kthSlowest, rescore, LIVE_SECONDS, IDLE_SETTLE_SECONDS, IDLE_SECONDS } from '../lib/bench.mjs';
 
 const ok = { jankPerInput: 1, p95Ms: 20, keyP95Ms: 20, idleFps: 0.1, pssMb: 140, firstFrameMs: 1300 };
 
@@ -76,4 +76,55 @@ test('jankPerInput: frames < 100 ms apart are one key press (same cases as Runti
   assert.equal(jankPerInput(rows([[0, true], [99, true], [198, false], [299, true], [600, true], [700, false]])), 1.33);
   assert.equal(jankPerInput(rows([[0, false], [300, false], [600, false]])), 0);
   assert.equal(jankPerInput([]), null);
+});
+
+test('p95 frame is rank-matched to the reference (R16): a skin that draws fewer frames is not penalised', () => {
+  // default: 140 frames, the 7 slowest at 60 ms (its p95); Phosphor-like skin: 50 frames, 3 at 60 ms, rest 20 ms
+  const ref = Array.from({ length: 140 }, (_, i) => (i < 7 ? 60 : 25));
+  const few = Array.from({ length: 50 }, (_, i) => (i < 3 ? 60 : 20));
+  assert.equal(kthSlowest(few, 7), 20);
+  assert.equal(kthSlowest([30, 10], 7), 0); // fewer frames than the rank: the missing frames cost nothing
+  const run = frameMs => ({ ...ok, p95Ms: frameMs === few ? 60 : 60, frameMs });
+  const s = summarize({ skinRuns: [run(few)], refRuns: [run(ref)], estimate: false });
+  assert.equal(s.p95Rank, 7);
+  assert.equal(s.reference.p95Ms, 60);
+  assert.equal(s.skin.p95Ms, 20); // the old p95 of its own 50 frames was 60 ms
+  assert.equal(s.gates.find(g => g.metric === 'p95Ms').ok, true);
+  // more frames than the reference: the same rank is compared, so extra slow frames count
+  const many = Array.from({ length: 300 }, (_, i) => (i < 15 ? 80 : 20));
+  assert.equal(summarize({ skinRuns: [run(many)], refRuns: [run(ref)] }).skin.p95Ms, 80);
+  // runs without frame lists (desktop, old JSON) keep their own p95
+  assert.equal(summarize({ skinRuns: [ok], refRuns: [ok] }).skin.p95Ms, 20);
+});
+
+test('Heavy tier (R27): only smoothness gates failed; a hard gate still means no tier', () => {
+  const run = over => ({ ...ok, ...over });
+  const heavy = summarize({ skinRuns: [run({ jankPerInput: 2.4, keyP95Ms: 80 })], refRuns: [ok], estimate: false });
+  assert.deepEqual([heavy.gatesOk, heavy.hardOk, heavy.tier], [false, true, 'Heavy']);
+  for (const over of [{ pssMb: 200 }, { idleFps: 5 }, { firstFrameMs: 3000 }, { pssMb: 200, jankPerInput: 3 }]) {
+    const s = summarize({ skinRuns: [run(over)], refRuns: [ok], estimate: false });
+    assert.deepEqual([s.hardOk, s.tier], [false, null], JSON.stringify(over));
+  }
+  assert.equal(tierFor(90, false), null); // two arguments: as before
+  assert.equal(tierFor(90, false, true), 'Heavy');
+});
+
+test('idle is measured after the live window (R28): a skin may move for 20 s after a key, then it rests', async () => {
+  assert.equal(LIVE_SECONDS, 20);
+  assert.ok(IDLE_SETTLE_SECONDS > LIVE_SECONDS, 'the idle window must start after the motion ends');
+  const src = await (await import('node:fs/promises')).readFile(new URL('../lib/bench.mjs', import.meta.url), 'utf8');
+  const run = src.slice(src.indexOf('export async function tvRun'));
+  assert.ok(run.indexOf('IDLE_SETTLE_SECONDS') > -1 && run.indexOf('IDLE_SETTLE_SECONDS') < run.indexOf('IDLE_SECONDS * 1000'), 'tvRun waits before the idle window');
+  assert.equal(IDLE_SECONDS, 30);
+});
+
+test('rescore (lx pack --from): a saved result gets the current gates and tier; a file without runs is refused', () => {
+  const slow = { ...ok, p95Ms: 30 }; // fails only the p95 gate (smoothness)
+  const saved = { skinId: 'x', estimate: false, tier: null, gatesOk: false, notes: ['old'], runsDetail: { skin: [slow, slow, slow], reference: [ok, ok, ok] } };
+  const b = rescore(saved);
+  assert.equal(b.tier, 'Heavy');
+  assert.equal(b.hardOk, true);
+  assert.deepEqual(b.notes, ['old']);
+  assert.deepEqual(saved.notes, ['old'], 'the saved object is not changed');
+  assert.throws(() => rescore({ skin: ok, reference: ok }), /runsDetail/);
 });

@@ -1,0 +1,125 @@
+/* Constellation: layout in design pixels of a 1920×1080 screen; 1rem = 16 design px (html font-size). Only
+   transform and opacity change on focus; the sky layers are static bitmaps moved by transform; nothing at rest. */
+@font-face { font-family: "Sora"; font-weight: 300; src: url("fonts/sora-latin-300-normal.woff2") format("woff2"); }
+@font-face { font-family: "Sora"; font-weight: 600; src: url("fonts/sora-latin-600-normal.woff2") format("woff2"); }
+
+:root {
+  --sky-top: #0B1150; --sky-mid: #1A2272; --sky-low: #3A3FA0; --hill-back: #2A2E86; --hill-front: #1C2068;
+  --star: #F4F1E8; --glow: rgba(150, 185, 255, 0.55); --gold: #F7C756; --gold-glow: rgba(247, 199, 86, 0.55);
+  --line: rgba(160, 200, 255, 0.55); --line-lit: rgba(200, 225, 255, 0.95); --text: #F4F1E8; --dim: #B9C3E8;
+  --card: #23296F; --card-line: rgba(160, 180, 255, 0.35); /* opaque (the old 86% pre-mixed over the sky): it moves */
+}
+html[data-opt-sky="deep"] {
+  --sky-top: #03051A; --sky-mid: #0A0F33; --sky-low: #1A1F55; --hill-back: #14183F; --hill-front: #0C0F2C;
+  --card: #0F1438;
+}
+html[data-opt-sky="dawn"] {
+  --sky-top: #1A1A5C; --sky-mid: #4B3F96; --sky-low: #C77DA8; --hill-back: #5B3F86; --hill-front: #3A2A66;
+  --glow: rgba(255, 200, 220, 0.5); --line: rgba(255, 210, 230, 0.55); --line-lit: rgba(255, 235, 245, 0.95);
+  --card: #3C2D74;
+}
+
+* { box-sizing: border-box; }
+html { font-size: calc(100vw / 120); }
+html, body { margin: 0; height: 100%; overflow: hidden; user-select: none; }
+body {
+  position: relative; color: var(--text); font-family: "Sora", system-ui, sans-serif; -webkit-font-smoothing: antialiased;
+  background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 55%, var(--sky-low) 100%);
+}
+
+/* ---------- sky (three.js layers, faded in once painted) ---------- */
+.sky { position: absolute; inset: -3vw; pointer-events: none; background: 0 0 / 100% 100% no-repeat; }
+.layer { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 600ms ease; }
+.sky-ready .layer { opacity: 1; }
+html[data-opt-milkyway="off"] .layer.far { opacity: 0.85; }
+.hills { position: absolute; left: -1vw; width: 102vw; bottom: 0; height: 26rem; }
+/* Depth motion is opt-in. will-change keeps the moving layers composited (without it each key re-rasterised them,
+   VU31 key p95 79 ms), but moving full-screen layers missed the frame budget on the VU31 even so. */
+html[data-opt-depth="on"] .layer, html[data-opt-depth="on"] .hills { transition: transform 700ms cubic-bezier(.2,.7,.2,1), opacity 600ms ease; will-change: transform; }
+/* Without depth motion, sky and hills are ONE background image of .sky (skin.js flatten): canvases are GPU layers
+   that slow every frame, and everything painted above them needs layers too. */
+.flat .layer, .flat .hills { visibility: hidden; }
+.hill.back { fill: var(--hill-back); opacity: 0.85; }
+.hill.front { fill: var(--hill-front); }
+
+/* ---------- header ---------- */
+header { position: absolute; left: 6rem; right: 6rem; top: 3rem; display: flex; justify-content: space-between; align-items: flex-start; }
+.time { font-weight: 300; font-size: 6.4rem; line-height: 1; letter-spacing: -0.1rem; }
+.date { font-size: 1.5rem; color: var(--dim); margin-top: 0.6rem; }
+.pill {
+  width: 7.6rem; height: 4.2rem; border-radius: 2.1rem; border: 0.12rem solid var(--card-line); background: rgba(20, 24, 80, 0.55);
+  display: flex; align-items: center; justify-content: center; transition: transform 160ms ease-out;
+}
+.pill svg { width: 2.2rem; height: 2.2rem; fill: none; stroke: var(--text); stroke-width: 1.8; stroke-linecap: round; }
+.pill[focused] { transform: scale(1.08); border-color: var(--gold); background: rgba(247, 199, 86, 0.18); }
+
+/* ---------- stars ---------- */
+main { position: absolute; inset: 0; }
+.lines { position: absolute; left: 0; top: 0; width: 100vw; height: 56.25vw; overflow: visible; }
+.lines line { stroke: var(--line); stroke-width: 2.4; stroke-linecap: round; }
+.lines line.lit { stroke: var(--line-lit); }
+.lines line.faint { stroke: var(--line); stroke-opacity: 0.45; stroke-width: 1.6; }
+.lines line.leader { stroke: var(--gold); stroke-opacity: 0; stroke-width: 1.6; stroke-dasharray: 4 6; } /* no fade: a fade repaints the full-screen SVG every frame */
+.lines line.leader.on { stroke-opacity: 0.8; }
+.recent-title { position: absolute; left: calc(690 * 100vw / 1920); top: calc(100 * 100vw / 1920); font-size: 1.1rem; letter-spacing: 0.3rem; color: var(--dim); opacity: 0.8; }
+.recent-title[hidden] { display: none; }
+html[data-opt-lines="off"] .lines { display: none; }
+
+.star { position: absolute; width: 4.4rem; height: 4.4rem; margin: -2.2rem 0 0 -2.2rem; } /* a real box: the D-pad picks by rects */
+.star.app { width: 3rem; height: 3rem; margin: -1.5rem 0 0 -1.5rem; }
+.star .glow, .star .ring, .star .spark { position: absolute; left: 50%; top: 50%; border-radius: 50%; }
+.star .glow { width: 6rem; height: 6rem; margin: -3rem 0 0 -3rem; background: radial-gradient(circle, var(--glow) 0%, rgba(150,185,255,0.12) 38%, rgba(150,185,255,0) 70%); }
+.star .spark { width: 3.4rem; height: 3.4rem; margin: -1.7rem 0 0 -1.7rem; fill: var(--star); border-radius: 0; }
+.star .ring { width: 7.6rem; height: 7.6rem; margin: -3.8rem 0 0 -3.8rem; border: 0.25rem solid var(--gold); opacity: 0; transform: scale(0.7); }
+/* Ring and spark change at once: as animated (translucent) layers they slowed every frame of a move (VU31: 13.6 → 5.5 ms). */
+.star .name { position: absolute; left: 5.4rem; top: 0.6rem; font-size: 2.6rem; font-weight: 600; white-space: nowrap; text-shadow: 0 0.1rem 0.6rem rgba(5, 8, 40, 0.8); }
+.star.fav:nth-child(4n+2) .name, .star.fav:nth-child(4n+3) .name { left: 50%; top: 5rem; transform: translateX(-50%); }
+
+.star.app .glow { width: 3.6rem; height: 3.6rem; margin: -1.8rem 0 0 -1.8rem; opacity: 0.8; }
+.star.app .spark { width: 1.9rem; height: 1.9rem; margin: -0.95rem 0 0 -0.95rem; }
+.star.app .ring { width: 4.6rem; height: 4.6rem; margin: -2.3rem 0 0 -2.3rem; }
+.star.recent .name { font-size: 1.5rem; }
+.star.app .name { left: 3.4rem; top: 0.3rem; font-size: 1.7rem; font-weight: 300; color: var(--dim); }
+html[data-opt-labels="focus"] .star.app .name { opacity: 0; transition: opacity 160ms ease; }
+
+.star[focused] .spark { transform: scale(1.35); fill: #FFF3D0; }
+.star[focused] .ring { opacity: 1; transform: scale(1); }
+.star[focused] .glow { background: radial-gradient(circle, var(--gold-glow) 0%, rgba(247,199,86,0.14) 40%, rgba(247,199,86,0) 72%); }
+.star.app[focused] .name, html[data-opt-labels="focus"] .star.app[focused] .name { opacity: 1; color: var(--text); font-weight: 600; }
+.star[data-moving] .ring { opacity: 1; transform: scale(1); border-style: dashed; }
+
+/* The field of other apps: a window that scrolls; the SDK scrolls the focused star into view. */
+.field { position: absolute; left: 0; right: 0; top: 36rem; height: 13.4rem; overflow: hidden; }
+.apps { position: relative; }
+.apps .star { scroll-margin: 4rem; }
+
+/* ---------- card for the focused app ---------- */
+.card {
+  position: absolute; left: 0; top: 0; width: 26.25rem; padding: 1.6rem; border-radius: 1.4rem;
+  background: var(--card); border: 0.1rem solid var(--card-line); /* no blurred shadow: the card moves and changes */
+  display: flex; flex-direction: column; gap: 0.4rem; transition: transform 260ms cubic-bezier(.2,.7,.2,1);
+}
+.card::after { /* the notch towards the star */
+  content: ""; position: absolute; right: -0.9rem; top: 50%; width: 1.8rem; height: 1.8rem; margin-top: -0.9rem;
+  background: var(--card); border-right: 0.1rem solid var(--card-line); border-top: 0.1rem solid var(--card-line); transform: rotate(45deg);
+}
+.card.right::after { right: auto; left: -0.9rem; transform: rotate(-135deg); }
+.card.above::after, .card.below::after { right: auto; left: var(--notch, 50%); margin-left: -0.9rem; }
+.card.above::after { top: auto; bottom: -0.9rem; transform: rotate(135deg); }
+.card.below::after { top: -0.9rem; margin-top: 0; transform: rotate(-45deg); }
+.card[hidden] { display: none; }
+.card .art { height: 11rem; border-radius: 0.8rem; overflow: hidden; background: rgba(255,255,255,0.06); margin-bottom: 0.8rem; display: flex; align-items: center; justify-content: center; }
+.card .art img { width: 100%; height: 100%; object-fit: cover; }
+.card.icon .art img { width: auto; height: 70%; object-fit: contain; }
+.card .mono { font-size: 4rem; font-weight: 600; color: var(--dim); }
+.card .kicker { font-size: 1.1rem; letter-spacing: 0.22rem; color: var(--gold); }
+.card .title { font-size: 3rem; font-weight: 600; line-height: 1.15; }
+.card .hint { font-size: 1.4rem; color: var(--dim); }
+
+/* ---------- horizon: TV inputs ---------- */
+.horizon { position: absolute; left: 3rem; right: 3rem; bottom: 2.6rem; height: 6.4rem; border-top: 0.12rem solid rgba(180, 200, 255, 0.45); overflow: hidden; }
+.inputs { display: flex; justify-content: space-around; align-items: center; height: 100%; }
+.input { position: relative; font-size: 2.6rem; font-weight: 300; color: var(--dim); padding: 0.4rem 1.6rem; border-radius: 1rem; transition: transform 160ms ease-out; }
+.input + .input::before { content: ""; position: absolute; left: -3rem; top: 20%; height: 60%; border-left: 0.12rem solid rgba(180, 200, 255, 0.45); }
+.input[data-connected] { color: var(--text); }
+.input[focused] { color: #1A1550; background: var(--gold); transform: scale(1.06); }

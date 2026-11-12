@@ -1,0 +1,19 @@
+{
+  "id": "coderain",
+  "name": "Code Rain",
+  "version": "1.0.0",
+  "apiVersion": 1,
+  "level": 3,
+  "author": "Web TV Launcher",
+  "description": "Streams of glowing code fall in depth over a dark floor. Each app is a stream that ends in its picture and name; the rain falls for a while after each key press, then holds still.",
+  "entry": "skin.html",
+  "options": [
+    { "id": "motion", "type": "choice", "label": "Rain falls", "default": "key",
+      "choices": [{ "value": "key", "label": "For 20 s after a key" }, { "value": "off", "label": "Never (still picture)" }] },
+    { "id": "colour", "type": "choice", "label": "Colour", "default": "green",
+      "choices": [{ "value": "green", "label": "Green" }, { "value": "amber", "label": "Amber" }, { "value": "ice", "label": "Ice blue" }] },
+    { "id": "pictures", "type": "toggle", "label": "App pictures", "default": true },
+    { "id": "density", "type": "choice", "label": "Rain", "default": "dense",
+      "choices": [{ "value": "dense", "label": "Dense" }, { "value": "light", "label": "Light" }] }
+  ]
+}

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="skin.css">
+  <script type="module" src="skin.js"></script>
+</head>
+<body>
+  <!-- Sky = CSS gradient. Three depth layers, each a bitmap painted once by three.js (hills.js) behind or in front of
+       SVG paper shapes, moved by CSS transforms. -->
+  <div class="scene" aria-hidden="true">
+    <div class="layer far">
+      <svg class="sky-art" viewBox="0 0 1920 1080" preserveAspectRatio="none">
+        <circle class="sun" cx="1567" cy="170" r="145"/><circle class="moon-cut" cx="1630" cy="128" r="122"/>
+        <g class="birds"><path d="M1090 160 q 30 -22 46 4 q 16 -26 46 -4 q -26 -4 -46 18 q -20 -22 -46 -18 Z"/><path d="M1190 120 q 26 -18 40 4 q 14 -22 40 -4 q -22 -4 -40 16 q -18 -20 -40 -16 Z"/><path d="M1270 70 q 34 -24 52 4 q 18 -28 52 -4 q -30 -4 -52 20 q -22 -24 -52 -20 Z"/></g>
+        <g class="stars"><circle cx="300" cy="90" r="4"/><circle cx="760" cy="60" r="3"/><circle cx="980" cy="150" r="3.5"/><circle cx="1240" cy="80" r="3"/><circle cx="1820" cy="330" r="3"/><circle cx="560" cy="200" r="2.5"/></g>
+      </svg><canvas></canvas>
+    </div>
+    <div class="layer mid">
+      <svg class="trees" viewBox="0 0 1920 1080" preserveAspectRatio="none">
+        <g transform="translate(960 -70)"><path d="M50 600 L 80 520 L 70 520 L 100 450 L 90 450 L 115 390 L 140 450 L 130 450 L 160 520 L 150 520 L 180 600 Z"/><path d="M150 600 L 170 545 L 162 545 L 182 500 L 175 500 L 192 460 L 210 500 L 203 500 L 222 545 L 214 545 L 234 600 Z"/></g>
+        <g><path d="M1640 520 L 1670 450 L 1660 450 L 1690 390 L 1680 390 L 1705 330 L 1730 390 L 1720 390 L 1750 450 L 1740 450 L 1770 520 Z"/><path d="M1730 520 L 1758 455 L 1748 455 L 1776 400 L 1767 400 L 1790 345 L 1813 400 L 1804 400 L 1832 455 L 1822 455 L 1850 520 Z"/></g>
+      </svg><canvas></canvas>
+    </div>
+    <div class="layer near"><canvas></canvas></div>
+  </div>
+
+  <header>
+    <div class="time">--:--</div>
+    <div class="greet"></div>
+    <div class="title"></div>
+    <div class="hint">OK to open · hold OK for more</div>
+  </header>
+
+  <main>
+    <div class="row favs" data-list="favourites"></div>
+    <div class="apps-wrap"><div class="head">All apps</div><div class="row apps" data-list="apps"></div></div>
+  </main>
+  <footer><div class="labels"></div></footer>
+</body>
+</html>

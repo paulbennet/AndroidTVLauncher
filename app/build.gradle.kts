@@ -21,8 +21,8 @@ android {
         applicationId = "com.weblauncher.tv"
         minSdk = 24
         targetSdk = 34
-        versionCode = 6
-        versionName = "1.1.1"
+        versionCode = 8
+        versionName = "1.3.0"
     }
 
     signingConfigs {

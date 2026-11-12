@@ -1,0 +1,18 @@
+{
+  "type": "stack", "id": "poster", "children": [
+    { "type": "hero", "id": "vname" },
+    { "type": "clock", "id": "bigclock", "date": "on" },
+    { "type": "settings", "id": "set", "label": "Settings" },
+    { "type": "section", "id": "favs", "title": "Favourites", "children": [
+      { "type": "row", "source": "favourites", "empty": "Hold OK on an app to add it" }
+    ]},
+    { "type": "scroll", "id": "list", "children": [
+      { "type": "section", "id": "apps", "title": "All apps", "children": [
+        { "type": "grid", "source": "apps", "columns": 1 }
+      ]}
+    ]},
+    { "type": "section", "id": "bar", "class": "inputs", "title": "Inputs", "children": [
+      { "type": "row", "source": "inputs" }
+    ]}
+  ]
+}

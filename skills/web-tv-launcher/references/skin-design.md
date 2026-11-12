@@ -25,7 +25,14 @@ Read with `docs/design-rules.md` (measured costs on a 2 GB Google TV with a Mali
 - **Animate only `transform` and `opacity`.** Paint properties (`box-shadow`, `filter`, `background`, sizes,
   positions) repaint every frame on this GPU.
 - **No `backdrop-filter`** (84 ms per frame). Avoid big blurs, blend modes, fixed backgrounds, smooth scrolling.
-- **Idle means zero frames:** no infinite animations at rest. Animate on focus change, then stop.
+- **What moves is opaque, with one radius.** A translucent ("glass") fill on a moving tile, or a different radius per
+  corner, cost the VU31 ~8 ms more on every frame. Pre-mix glass colours over the background. No `box-shadow` on
+  rotated elements and no `clip-path` on labels (they re-raster). Zoom (`scale`) re-rasters big tiles when it ends:
+  lift them with `translate` instead.
+- **No visible full-screen canvas.** Draw WebGL once, `toBlob()` it and show it as a CSS background image; redraw
+  when the focus rests (~600 ms), not per key. Parallax of full-screen layers belongs behind an opt-in option.
+- **Idle means zero frames:** no infinite animations at rest. Animate on focus change, then stop. A live scene (fish,
+  fire, rain) may move for at most 20 s after a key, then it rests (see `gallery/skins/aquarium/live.js`).
 - Short focus transitions (≤ 150 ms); one layer per tile at most; ≤ 8 elements with `will-change`.
 - Images: WebP/AVIF, pre-scaled (banners 320×180, icons 160×160, wallpaper 1920×1080 max), ≤ 32 MB decoded total.
 - Few DOM nodes (< 1500 with 50 apps). Don't add a second faded pseudo-element per tile (measured: p95 frame up 25%).

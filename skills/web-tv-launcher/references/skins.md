@@ -46,8 +46,9 @@ node tools/lx.mjs bench my-skin --tv <ip>:5555   # the real check: ~6 min, relea
   `backdrop-filter`; no `transition: all`; no infinite animation at rest (`idle-animation`); images ≤ 1920×1080
   and ≤ 32 MB decoded in total; woff2 fonts only; nothing from the network (`external-url`).
 - **Bench gates on the TV** (relative to `default` in the same session): janky frames per key ≤ 1.5, p95 frame
-  ≤ 1.15 × default, key latency p95 < 50 ms, idle ≤ 1 frame/s, total PSS < 182 MB, cold first frame ≤ 1.15 ×
-  default. Score 100 = as fast as default. Tier: Lite ≥ 85, Standard ≥ 60, Rich = passes the gates; a failed gate =
+  ≤ 1.15 × default (rank-matched: each skin's k-th slowest frame, k = 5% of default's frames), key latency p95 < 50 ms, idle ≤ 1 frame/s (measured 25 s after the last key: a skin may move for 20 s after a key, then it must rest), total PSS < 182 MB, cold first frame ≤ 1.15 ×
+  default. Score 100 = as fast as default. Tier: Lite ≥ 85, Standard ≥ 60, Rich = passes the gates; Heavy = only smoothness gates (jank, p95 frame, key
+  latency) failed, and a TV uses the skin only with Launcher settings → Allow heavy skins on; a failed hard gate =
   no tier, and `lx pack --tv` refuses.
 - `lx bench --tv` force-stops the launcher, which turns "Web Launcher home" off. It warns and prints the command to
   turn it on again; tell the TV's owner before you run it.

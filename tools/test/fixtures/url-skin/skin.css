@@ -1,0 +1,3 @@
+/* Relative url() must resolve inside the package (core/skins.js absoluteUrls). */
+lx-bg { background: url("img/dot.svg") center / 10rem no-repeat, #101010; }
+lx-root::after { content: ""; background-image: url('../url-skin/img/dot.svg'), url(../../escape.svg); }

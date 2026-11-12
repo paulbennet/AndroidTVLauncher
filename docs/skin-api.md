@@ -38,14 +38,14 @@ Installed skins work on every build (release included) and stay until removed. O
 - Checks at install: at most 5 MB packed, 16 MB unpacked, 400 files. Safe file names only. `manifest.json` at the top, with a valid id that is not a built-in one (`default`, `minimal`, `marquee`, `shelf`), `apiVersion: 1` and level 0–3.
 - Then the TV runs the **static lint** (the same `lint.js` as `lx lint`, without the rendered DOM checks): package, manifest, layout, CSS, the level 3 entry page and images. Any lint error rejects the skin, and the TV shows the first one (`lx install` prints it). Warnings are kept and counted in the Skin menu.
 - A new version of an installed skin replaces the old one in one step; a rejected one changes nothing.
-- **Score badge.** The Skin menu shows the tier that the package's `score.json` claims (`lx pack` writes it): `Lite`, `Standard` or `Rich`. It is marked `(estimate)` for a desktop bench and `(other TV)` when it was measured on another TV model. "no score" means the package has no `score.json`. Pack with `lx pack my-skin --tv` for a real TV score.
+- **Score badge.** The Skin menu shows the tier that the package's `score.json` claims (`lx pack` writes it): `Lite`, `Standard`, `Rich` or `Heavy` (a Heavy skin needs **Allow heavy skins** on, see Tier below). It is marked `(estimate)` for a desktop bench and `(other TV)` when it was measured on another TV model. "no score" means the package has no `score.json`. Pack with `lx pack my-skin --tv` for a real TV score.
 - **Settings backup.** The LAN page also saves and restores the launcher settings (favourites, hidden apps, the skin, every skin's options) as `launcher-settings.json`. Over ADB: `lx settings export [file] --tv` and `lx settings import <file> --tv`.
 - **Install skin → Remove a skin** deletes an installed skin. If it was the active one, the launcher goes back to the default skin.
 - **Live reload on the TV:** `lx dev my-skin --tv` installs the skin through ADB on every save and shows it (about 1 s; any build). Without ADB: on the TV turn on **Install skin → Live reload for lx dev**, then run `lx dev my-skin --lan 192.168.1.20:7190 --pin 123456`. The page then stays open (1 hour at most, or until another app comes to the front), the PIN stays the same, and every save shows at once as a preview.
 - `lx push` (dev skins, debug builds) still works too.
 
 ### Skin gallery (gallery.json)
-A gallery is a folder of static files on any `https://` host: `gallery.json`, the packages and their previews. There is no built-in gallery. Set its link on the TV's LAN page ("Gallery link"), with `lx gallery set https://…/gallery.json --tv`, or in a settings import (`galleryUrl`).
+A gallery is a folder of static files on any `https://` host: `gallery.json`, the packages and their previews. The project's own gallery is `https://paulbennet.github.io/AndroidTVLauncher/gallery/gallery.json` (from `site/gallery/`; see [showcase.md](showcase.md)): with no gallery set, **Skin gallery** offers it with one press. Set any other link on the TV's LAN page ("Gallery link"), with `lx gallery set https://…/gallery.json --tv`, or in a settings import (`galleryUrl`).
 
 ```json
 { "format": "web-launcher-gallery", "version": 1, "name": "My gallery",
@@ -151,7 +151,7 @@ A tree of blocks. Every block takes optional `id` and `class` (names: letters, d
 Every layout is wrapped in `lx-root`, which also holds `lx-bg` (the background layer). Skins without a layout use the default skin's `layout.json`.
 
 ## Level 3: your own page (sandboxed)
-A level 3 skin is a web page of its own: HTML, CSS and JavaScript (frameworks allowed; their bytes count against the 150 KB JS budget). Start from the template with `lx new my-skin --level 3`. It includes `lx.d.ts`: with `// @ts-check` at the top of `skin.js`, editors such as VS Code check your use of `lx` (event names, the fields of `data`) without a build step. `lx.d.ts` is never packed.
+A level 3 skin is a web page of its own: HTML, CSS and JavaScript (frameworks allowed; their bytes count against the 512 KB JS budget, which fits a tree-shaken three.js; load big libraries after the first frame with `import()`, because the cold-start gate measures the first frame). Start from the template with `lx new my-skin --level 3`. It includes `lx.d.ts`: with `// @ts-check` at the top of `skin.js`, editors such as VS Code check your use of `lx` (event names, the fields of `data`) without a build step. `lx.d.ts` is never packed.
 
 ```
 my-skin/
@@ -175,6 +175,7 @@ my-skin/
 | `lx.on('focus', el => …)` | The focused element changed (it also has the `[focused]` attribute) |
 | `lx.on('options', values => …)` | Skin option values (also `html[data-opt-*]` and `--lx-opt-*`, like levels 1–2) |
 | `lx.on('home' \| 'resume' \| 'visibility', …)` | Home/Back pressed (focus is already on the first item), launcher shown again, page hidden or shown |
+| `lx.on('launch', id => …)` | OK was pressed on an app or input; the core opens it right after (for a short reaction, never to block) |
 | `lx.refresh()` | Re-apply focus after you re-rendered outside a `data` handler |
 | `lx.data`, `lx.focused` | The last data message, the focused element |
 
@@ -266,7 +267,7 @@ Nothing is measured in safe mode, while benching, or while another app is in fro
 | First frame after a cold start | ≤ 1.15 × `default` in the same session |
 
 **Score** = 100 × the geometric mean of default ÷ skin for each metric, each capped at 1, so matching the default gives 100.
-**Tier:** Lite ≥ 85, Standard ≥ 60, Rich = passes the gates. A failed gate means no tier, and `lx pack --tv` refuses to pack.
+**Tier:** Lite ≥ 85, Standard ≥ 60, Rich = passes the gates. **Heavy** = only smoothness gates failed (janky frames per key, p95 frame, key latency): the skin can stutter on a slow TV, and a TV uses it only with **Launcher settings → Allow heavy skins** on (off by default). A failed hard gate (idle frames, memory, cold start) means no tier, and `lx pack --tv` refuses to pack.
 
 - `lx bench my-skin --tv [host:port]` is the real check:
   - It pushes the skin and starts the launcher with `--es bench <id>`, which uses reference apps and keeps settings in memory, so your favourites stay untouched.
@@ -277,3 +278,5 @@ Nothing is measured in safe mode, while benching, or while another app is in fro
   - Gates are not checked.
   - Paint-heavy CSS shows up clearly. For example, large box-shadows plus `drop-shadow()` on every tile cost about 3× the default skin's render time and score about 30.
 - `lx pack` writes the result into `score.json` (`bench`, `tier`, `tierEstimate`). Add `--tv` to pack with the TV's result.
+  A skin that did not change since its last TV bench can skip the bench: `lx bench my-skin --tv --json > bench.json`, then
+  `lx pack my-skin --from bench.json`. The saved runs are scored again with the current gates.

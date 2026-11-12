@@ -257,3 +257,13 @@ test('inputs (shelf, level 3): the frame gets "input:" items; OK opens only inpu
   await press('Enter');
   assert.deepEqual(await page.evaluate(() => window.__inputs), ['hdmi1'], 'an input id the core never sent does nothing');
 });
+
+test('l3: the frame gets a launch event with the item id before the app opens', { timeout: 30000 }, async () => {
+  const frame = await open('l3-basic');
+  await frame.evaluate(() => { window.__launches = []; lx.on('launch', id => window.__launches.push(id)); });
+  await press('Enter');
+  const got = await frame.evaluate(() => window.__launches);
+  const launched = await page.evaluate(() => window.__launched);
+  assert.equal(got.length, 1);
+  assert.equal(got[0], launched[launched.length - 1], 'same id as the app the core opened');
+});

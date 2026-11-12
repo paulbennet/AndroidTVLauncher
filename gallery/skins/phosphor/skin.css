@@ -1,0 +1,101 @@
+/* Phosphor (level 1): only CSS on the default layout (skins/default/layout.json) and the stable hooks of
+   docs/skin-api.md. No scripts. 1rem = 1/96 of the screen width (20 px at 1920). Static glow and scanlines; the only
+   motion is a 2 s cursor blink on the focused line, which restarts on each focus move (a new element), then stops. */
+@font-face { font-family: "JetBrains Mono"; font-weight: 400; src: url("fonts/jetbrains-mono-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "JetBrains Mono"; font-weight: 700; src: url("fonts/jetbrains-mono-latin-700-normal.woff2") format("woff2"); }
+
+:root { --p: #3BFF6A; --p-dim: #1E9A45; --p-glow: rgba(59, 255, 106, 0.55); --screen: #050A05; }
+html[data-opt-colour="amber"] { --p: #FFB000; --p-dim: #A06E00; --p-glow: rgba(255, 176, 0, 0.5); --lx-text: #FFB000; --lx-accent: #FFB000; }
+html[data-opt-colour="white"] { --p: #E8F0E8; --p-dim: #8A928A; --p-glow: rgba(232, 240, 232, 0.4); --lx-text: #E8F0E8; --lx-accent: #E8F0E8; }
+
+html, body { background: var(--screen); }
+lx-root { color: var(--p); text-shadow: 0 0 0.3rem var(--p-glow); padding: 1.6rem 1.6rem 4.4rem; }
+/* The terminal window frame and the status bar. */
+lx-root::before {
+  content: ""; position: fixed; inset: 1.4rem; border: 0.16rem solid var(--p); pointer-events: none; z-index: 1;
+}
+lx-root::after {
+  content: "-- NORMAL --   hold OK = options   BACK = home"; position: fixed; left: 1.4rem; right: 1.4rem; bottom: 1.4rem;
+  height: 3.2rem; line-height: 3.2rem; padding: 0 1.8rem; border-top: 0.16rem solid var(--p);
+  font-size: 1.25rem; font-weight: 700; white-space: pre; z-index: 1;
+}
+/* Scanlines: one static overlay, painted once. */
+lx-bg { background: var(--screen); }
+html[data-opt-scanlines="on"] lx-bg::after, html:not([data-opt-scanlines]) lx-bg::after {
+  content: ""; position: fixed; inset: 0; z-index: 3; pointer-events: none;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.22) 0, rgba(0, 0, 0, 0.22) 0.1rem, transparent 0.1rem, transparent 0.25rem);
+}
+lx-bg { z-index: 3; background: transparent; pointer-events: none; }
+
+/* ---------- title bar: prompt name, clock, memory, settings ---------- */
+#topbar { align-items: center; padding: 0.6rem 1.8rem; gap: 1.2rem; border-bottom: 0.16rem solid var(--p); min-height: 3.6rem; flex: 0 0 auto; }
+#topbar::before { content: "webtv@livingroom: ~"; font-size: 1.5rem; font-weight: 700; order: -1; }
+lx-clock { display: flex; gap: 1rem; order: 2; font-size: 1.5rem; font-weight: 700; }
+lx-clock .lx-time, lx-clock .lx-date { font-size: 1.5rem; font-weight: 700; letter-spacing: 0; color: var(--p); margin: 0; line-height: 1.2; }
+lx-clock .lx-time::before, lx-clock .lx-date::before { content: "[ "; }
+lx-clock .lx-time::after, lx-clock .lx-date::after { content: " ]"; }
+lx-clock .lx-date { text-transform: uppercase; }
+lx-memory, lx-settings {
+  order: 3; background: none; border-radius: 0; padding: 0.1rem 0.4rem; font-size: 1.25rem; font-weight: 700; color: var(--p);
+  text-transform: uppercase;
+}
+lx-memory::before, lx-settings::before { content: "[ "; }
+lx-memory::after, lx-settings::after { content: " ]"; }
+lx-settings[focused] { background: var(--p); color: var(--screen); text-shadow: none; }
+
+/* ---------- the prompt: the focused banner app (the core's caption) ---------- */
+lx-caption, lx-caption:empty {
+  display: block; position: fixed; left: 4.2rem; top: 7.2rem; transform: none; z-index: 2;
+  background: none; padding: 0; border-radius: 0; font-size: 3rem; font-weight: 700; color: var(--p);
+}
+lx-caption::before { content: "> open "; }
+lx-caption:empty::before { content: "> "; }
+lx-caption::after { content: ""; display: inline-block; width: 1.5rem; height: 2.6rem; margin-left: 0.4rem; vertical-align: -0.35rem; background: var(--p); }
+
+/* ---------- the listing: favourites, recent and inputs left, all apps right ---------- */
+lx-scroll {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: auto auto 1fr; column-gap: 4rem; align-content: start;
+  padding: 7.6rem 2.6rem 4rem; margin-bottom: 0.4rem;
+}
+lx-section { margin: 0 0 1.4rem; min-width: 0; }
+lx-scroll > lx-section:nth-child(4) { grid-column: 2; grid-row: 1 / span 3; }
+lx-section > .lx-title { font-size: 0; margin: 0 0 0.6rem; color: var(--p-dim); }
+lx-section > .lx-title::before { font-size: 1.6rem; font-weight: 700; color: var(--p); }
+lx-scroll > lx-section:nth-child(1) > .lx-title::before { content: "~/favourites $ ls -l"; }
+lx-scroll > lx-section.recent > .lx-title::before { content: "~/recent $ ls -t"; }
+lx-scroll > lx-section.inputs > .lx-title::before { content: "~/inputs $ ls"; }
+lx-scroll > lx-section:nth-child(4) > .lx-title::before { content: "~/apps $ ls | column"; }
+lx-section .lx-count { display: none; }
+
+lx-row { flex-direction: column; gap: 0; overflow: visible; padding: 0; margin: 0; }
+lx-row > lx-tile { flex: 0 0 auto; }
+lx-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 2rem; row-gap: 0; }
+
+/* Every tile is one line of text: the app name (from aria-label), lower case. */
+lx-tile {
+  aspect-ratio: auto; height: 2.5rem; display: flex; align-items: center; padding: 0 0.8rem;
+  background: none; border-radius: 0; transition: none; font-size: 1.6rem; text-transform: lowercase;
+}
+lx-tile::before { content: attr(aria-label); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+lx-tile .lx-banner, lx-tile .lx-icon-wrap, lx-tile .lx-input-icon { display: none; }
+lx-tile::after { content: none; }
+lx-row[source="favourites"] > lx-tile::after {
+  content: "★"; position: absolute; inset: auto 0.8rem auto auto; box-shadow: none; opacity: 1; font-size: 1.3rem; color: inherit;
+}
+lx-grid > lx-tile[fav] .lx-fav-dot { display: none; }
+lx-tile[kind="input"]:not([connected]) { color: var(--p-dim); }
+
+lx-tile[focused] { transform: none; background: var(--p); color: var(--screen); text-shadow: none; font-weight: 700; }
+lx-tile[moving] { outline: 0.16rem dashed var(--p); }
+/* The block cursor after the focused name: blinks for 2 s after each move (a new element restarts it), then stays. */
+lx-tile[focused] .lx-fav-dot {
+  display: inline-block; position: static; width: 0.9rem; height: 1.8rem; margin-left: 0.4rem; border-radius: 0;
+  background: var(--screen); box-shadow: none; animation: phosphor-blink 500ms steps(1, end) 4;
+}
+@keyframes phosphor-blink { 50% { opacity: 0; } }
+
+/* Option: a preview of the focused app's banner, top right inside the terminal. */
+html[data-opt-banners="on"] lx-tile[focused] .lx-banner {
+  display: block; position: fixed; right: 4.2rem; top: 6.2rem; width: 11rem; height: auto; aspect-ratio: 16 / 9;
+  border: 0.16rem solid var(--p); filter: none; z-index: 2;
+}

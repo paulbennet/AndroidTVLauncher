@@ -10,7 +10,7 @@ performance budget before it reaches a TV.
 | **Marquee** | **Shelf** |
 | ![Marquee skin](docs/img/skin-marquee.png) | ![Shelf skin](docs/img/skin-shelf.png) |
 
-**Version 1.1.1** · Android 7+ (minSdk 24) · built and measured on a Sony Bravia VU31 (Google TV, Android 14, 2 GB RAM)
+**Version 1.2.0** · Android 7+ (minSdk 24) · built and measured on a Sony Bravia VU31 (Google TV, Android 14, 2 GB RAM)
 · MIT licence
 
 ## Why use it
@@ -22,7 +22,8 @@ performance budget before it reaches a TV.
   skin hangs, crashes, janks or uses too much memory. Hold **Back** for 5 s for safe mode. → [SECURITY.md](SECURITY.md)
 - **A performance budget with numbers.** `lx lint` (file and image sizes, CSS rules, idle animation) and
   `lx bench --tv` (janky frames per key, p95 frame, key latency, cold start and memory, relative to the default skin on
-  the same TV) give every skin a score and a tier: Lite, Standard or Rich.
+  the same TV) give every skin a score and a tier: Lite, Standard or Rich. A skin that is too slow to be smooth is marked Heavy,
+  and a TV uses it only when its owner allows heavy skins.
 - **Fast skin work on a real TV.** `lx dev --tv` installs and shows the skin on every save, in about 1 s.
   `lx pack` makes a `.lxskin` file; users install it from a phone (LAN page and PIN), a link, a QR code, ADB or a
   gallery.

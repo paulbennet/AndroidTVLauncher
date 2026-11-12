@@ -1,0 +1,18 @@
+{
+  "id": "tidepool",
+  "name": "Tidepool",
+  "version": "1.0.0",
+  "apiVersion": 1,
+  "level": 3,
+  "author": "Web TV Launcher",
+  "description": "A calm deep-sea pool: glass pebbles for your apps, and caustic light (three.js) that takes the colour of the app you pick.",
+  "entry": "skin.html",
+  "options": [
+    { "id": "water", "type": "choice", "label": "Water", "default": "deep",
+      "choices": [{ "value": "deep", "label": "Deep" }, { "value": "shallow", "label": "Shallow teal" }] },
+    { "id": "caustics", "type": "choice", "label": "Caustic light", "default": "lively",
+      "choices": [{ "value": "lively", "label": "Lively" }, { "value": "calm", "label": "Calm" }, { "value": "off", "label": "Off" }] },
+    { "id": "tint", "type": "toggle", "label": "Light takes the app's colour", "default": true },
+    { "id": "living", "type": "toggle", "label": "Living water (keeps moving; uses more power)", "default": false }
+  ]
+}

@@ -1,0 +1,53 @@
+/* Holiday: positions in design pixels of a 1920×1080 screen; 1rem = 16 design px. The room is one still picture;
+   tiles are opaque with one radius and only the focused tile moves (docs/design-rules.md). */
+@font-face { font-family: "Cormorant Garamond"; font-weight: 400; src: url("fonts/cormorant-garamond-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Cormorant Garamond"; font-weight: 600; src: url("fonts/cormorant-garamond-latin-600-normal.woff2") format("woff2"); }
+
+:root { --cream: #F6E9D2; --dim: rgba(246, 233, 210, 0.74); --gold: #E9B95E; --tile: #2A1810; }
+* { box-sizing: border-box; }
+html { font-size: calc(100vw / 120); }
+html, body { margin: 0; height: 100%; overflow: hidden; user-select: none; }
+body { position: relative; background: #120A08; color: var(--cream); font-family: "Cormorant Garamond", Georgia, serif; font-weight: 400; font-variant-numeric: lining-nums; }
+
+.room { position: absolute; inset: 0; background: #120A08 url("img/room.webp") center / cover no-repeat; }
+.glow { position: absolute; inset: 0; width: 100%; height: 100%; }
+.glow[hidden] { display: none; }
+/* A darker floor for the app row, and a darker wall behind the clock. */
+.shade { position: absolute; inset: 0; background:
+  linear-gradient(180deg, rgba(14, 7, 5, 0) 58%, rgba(14, 7, 5, 0.8) 80%, rgba(14, 7, 5, 0.94)),
+  linear-gradient(100deg, rgba(14, 7, 5, 0.72) 0%, rgba(14, 7, 5, 0.35) 20%, rgba(14, 7, 5, 0) 34%); }
+
+header { position: absolute; left: 3.6rem; top: 2.4rem; max-width: 34rem; }
+.time { font-size: 4.6rem; line-height: 1; }
+.greet { margin-top: 0.5rem; font-size: 1.6rem; color: var(--dim); min-height: 1.9rem; }
+html[data-opt-greeting="off"] .greet { visibility: hidden; }
+.title { margin-top: 1.4rem; font-size: 6rem; line-height: 1.05; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-height: 6.4rem; transition: opacity 600ms ease; }
+
+/* ---------- the app row ---------- */
+main { position: absolute; left: 0; right: 0; bottom: 5.2rem; }
+.row { display: flex; gap: 1.2rem; padding: 1.2rem 4rem 0.4rem; overflow: hidden; transition: opacity 600ms ease; }
+.list { display: flex; gap: 1.2rem; flex: 0 0 auto; }
+.list:empty { display: none; }
+.tile { flex: 0 0 auto; width: 17.6rem; scroll-margin: 4rem; transition: transform 160ms cubic-bezier(.2, .8, .2, 1); }
+.tile .art { height: 9.8rem; border-radius: 0.7rem; background: var(--tile); display: flex; align-items: center; justify-content: center; }
+.tile img { width: 100%; height: 100%; object-fit: cover; border-radius: 0.7rem; }
+.tile.icon img { width: auto; height: 52%; object-fit: contain; border-radius: 0; }
+.tile .mono { font-size: 3rem; font-weight: 600; color: var(--dim); }
+.tile .name { margin-top: 0.6rem; text-align: center; font-size: 1.5rem; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Focus: a lift (no zoom) and a thin gold outline, at once. */
+.tile[focused] { transform: translateY(-0.7rem); }
+.tile[focused] .art { outline: 0.2rem solid var(--gold); outline-offset: 0.25rem; }
+.tile[focused] .name { color: var(--cream); }
+.tile[data-moving] .art { outline: 0.2rem dashed var(--cream); outline-offset: 0.25rem; }
+
+/* ---------- inputs and Settings: small text ---------- */
+footer { position: absolute; right: 2.8rem; bottom: 1.8rem; display: flex; gap: 0.6rem; transition: opacity 600ms ease; }
+.item { padding: 0.25rem 1rem; border-radius: 0.5rem; font-size: 1.45rem; color: var(--dim); }
+.item[data-connected], .item[data-action] { color: var(--cream); }
+.item[focused] { background: var(--gold); color: #24130A; }
+
+/* ---------- ambient: after 20 s without a key the row steps aside; the focused name stays, dimmed ---------- */
+/* Hiding is instant (the idle gate counts every frame at rest); coming back fades in (the base transition). */
+.ambient .row, .ambient footer { opacity: 0; transition: none; }
+.ambient .title { opacity: 0.55; transition: none; }
+.instant .row, .instant footer, .instant .title { transition: none !important; }

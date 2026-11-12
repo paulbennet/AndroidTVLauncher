@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="skin.css">
+  <script type="module" src="skin.js"></script>
+</head>
+<body>
+  <!-- The room: one still picture. Fire glow, tree lights and snow are drawn on the canvas above it (room.js),
+       only for a while after a key. -->
+  <div class="room" aria-hidden="true"></div>
+  <canvas class="glow" aria-hidden="true"></canvas>
+  <div class="shade" aria-hidden="true"></div>
+
+  <header>
+    <div class="time">--:--</div>
+    <div class="greet"></div>
+    <div class="title"></div>
+  </header>
+
+  <main>
+    <div class="row" data-scroll>
+      <div class="list favs" data-list="favourites"></div>
+      <div class="list apps" data-list="apps"></div>
+    </div>
+  </main>
+
+  <footer class="inputs"></footer>
+</body>
+</html>
