@@ -1,6 +1,6 @@
 ---
 title: "Your Android TV home screen is a web page now: an open launcher anyone can reskin"
-published: false
+published: true
 description: "People customise their Android TVs with Claude these days. As a frontend dev of more than ten years, I built a home screen made of HTML, CSS and JS, with a speed budget, so everyone can build on it."
 tags: androidtv, webdev, opensource, ai
 cover_image: https://paulbennet.github.io/AndroidTVLauncher/blog/cover.png

@@ -112,7 +112,8 @@ export function page(meta, html) {
 <p class="lead">${esc(meta.description)}</p>
 ${html}
 <footer>Paul Bennet · <a href="https://github.com/paulbennet/AndroidTVLauncher">Web TV Launcher on GitHub</a> ·
-<a href="../skins/">Skins</a> · <a href="../">Install</a></footer>
+<a href="../skins/">Skins</a> · <a href="../">Install</a> ·
+<a href="https://dev.to/paulbennetjoshua/your-android-tv-home-screen-is-a-web-page-now-an-open-launcher-anyone-can-reskin-3ld5">Comment on dev.to</a></footer>
 </article>
 </body>
 </html>
