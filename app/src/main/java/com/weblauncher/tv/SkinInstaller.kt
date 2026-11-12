@@ -175,6 +175,7 @@ class SkinInstaller(private val skins: SkinStore, private val metaDir: File) {
                     readTimeout = 20_000
                     instanceFollowRedirects = false
                     setRequestProperty("Accept", accept)
+                    if (this is javax.net.ssl.HttpsURLConnection) PublicNet.guardFor(u)?.let { sslSocketFactory = it }
                 }
                 val code = c.responseCode
                 if (code in 300..399) {
@@ -185,6 +186,8 @@ class SkinInstaller(private val skins: SkinStore, private val metaDir: File) {
                 if (code != HttpURLConnection.HTTP_OK) throw Rejected("the server answered $code")
                 if (c.contentLengthLong > max) throw Rejected("larger than ${sizeText(max)}")
                 return c.inputStream.use { readLimited(it, max) }
+            } catch (e: PublicNet.PrivateAddress) {
+                throw Rejected("only links to public internet hosts can be used")
             } catch (e: IOException) {
                 throw Rejected("download failed (${e.javaClass.simpleName})")
             } finally {
@@ -209,16 +212,8 @@ class SkinInstaller(private val skins: SkinStore, private val metaDir: File) {
      */
     fun testLoopback(u: URL) = BuildConfig.DEBUG && u.protocol == "http" && u.host == "127.0.0.1"
 
-    /**
-     * The LAN page sends links on behalf of anyone with the PIN: don't let it probe the home network (router pages,
-     * other devices) through the TV. Every address the name resolves to must be public.
-     */
-    private fun publicHost(host: String): Boolean = runCatching {
-        java.net.InetAddress.getAllByName(host).all { a ->
-            !(a.isLoopbackAddress || a.isSiteLocalAddress || a.isLinkLocalAddress || a.isAnyLocalAddress || a.isMulticastAddress ||
-                (a is java.net.Inet6Address && (a.address[0].toInt() and 0xfe) == 0xfc)) // IPv6 unique local fc00::/7
-        }
-    }.getOrDefault(false)
+    /** The fast check before connecting; [PublicNet.Guard] checks the address really used (DNS rebinding). */
+    private fun publicHost(host: String) = PublicNet.publicHost(host)
 
     // ------------------------------------------------------------ archive checks
 

@@ -53,6 +53,9 @@ A gallery is a folder of static files on any `https://` host: `gallery.json`, th
                "package": "ember-1.0.0.lxskin", "sha256": "<64 hex>", "size": 4096, "preview": "ember-1.0.0.jpg",
                "tier": "Lite", "score": 93 } ] }
 ```
+- **Official gallery:** `https://paulbennet.github.io/AndroidTVLauncher/gallery/gallery.json`, mirrored through jsDelivr at
+  `https://cdn.jsdelivr.net/gh/paulbennet/AndroidTVLauncher@main/site/gallery/gallery.json`. Package and preview paths
+  in `gallery.json` are relative, so any static host of the folder works.
 - `lx gallery build <out-dir> <skin-dir|file.lxskin>... [--name "My gallery"]` writes all of this. A skin folder is linted (errors stop the build), zipped and shot in Chrome for Testing (1280×720 JPEG). A `.lxskin` from `lx pack` keeps its `tier` and `score`; a picture with the same name next to it is its preview.
 - `lx gallery serve <dir> --tv` serves it on `127.0.0.1:7191` and points a **debug** build at it through `adb reverse`, to test a gallery before you publish it.
 - The TV downloads everything natively (the launcher page has no network). Limits: `gallery.json` 256 KB and 200 skins; a preview 512 KB, PNG, JPEG or WebP (checked by its bytes); a package 5 MB. `package` and `preview` are relative to `gallery.json` or full `https://` links; redirects are followed at most 3 times and only to public `https://` hosts.

@@ -10,7 +10,7 @@ performance budget before it reaches a TV.
 | **Marquee** | **Shelf** |
 | ![Marquee skin](docs/img/skin-marquee.png) | ![Shelf skin](docs/img/skin-shelf.png) |
 
-**Version 1.3.0** · Android 7+ (minSdk 24) · built and measured on a Sony Bravia VU31 (Google TV, Android 14, 2 GB RAM)
+**Version 1.3.1** · Android 7+ (minSdk 24) · built and measured on a Sony Bravia VU31 (Google TV, Android 14, 2 GB RAM)
 · MIT licence
 
 ## Skin gallery

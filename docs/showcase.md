@@ -9,6 +9,7 @@
 
 On a launcher older than 1.3.0, set the gallery link on the Install skin page (phone or computer):
 `https://paulbennet.github.io/AndroidTVLauncher/gallery/gallery.json`.
+If that link does not load, the same gallery is mirrored at `https://cdn.jsdelivr.net/gh/paulbennet/AndroidTVLauncher@main/site/gallery/gallery.json`.
 
 ## The skins
 | | Skin | Level | Tier | What it shows |

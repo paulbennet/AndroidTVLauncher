@@ -1,6 +1,6 @@
 {
   "name": "web-tv-launcher",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "Set up Web TV Launcher on Android TV / Google TV (also for non-engineers), develop it, troubleshoot new problems, and design, lint, bench, pack, publish, install and debug skins.",
   "author": {
     "name": "Paul Bennet",

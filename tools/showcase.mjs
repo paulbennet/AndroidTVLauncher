@@ -9,6 +9,8 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const PAGES = 'https://paulbennet.github.io/AndroidTVLauncher';
 const GALLERY_URL = `${PAGES}/gallery/gallery.json`;
 const REPO = 'https://github.com/paulbennet/AndroidTVLauncher';
+/** The same files from the public repo through jsDelivr: a second host when Pages is down (package paths are relative). */
+const MIRROR_URL = 'https://cdn.jsdelivr.net/gh/paulbennet/AndroidTVLauncher@main/site/gallery/gallery.json';
 
 /** What each skin shows off: one line per skin, for people who make skins. */
 const EXTRA = {
@@ -96,6 +98,7 @@ const html = `<!doctype html>
     </ol>
     <p>Older launcher versions: open <strong>Install skin</strong>, scan the code with your phone and paste this link in
     “Gallery link”: <code>${GALLERY_URL}</code></p>
+    <p>If that link does not load, use the mirror: <code>${MIRROR_URL}</code></p>
   </section>
 </header>
 <main>
@@ -128,6 +131,7 @@ ${skins.length} skins in the project's gallery, each a different idea and techni
 
 On a launcher older than 1.3.0, set the gallery link on the Install skin page (phone or computer):
 \`${GALLERY_URL}\`.
+If that link does not load, the same gallery is mirrored at \`${MIRROR_URL}\`.
 
 ## The skins
 | | Skin | Level | Tier | What it shows |

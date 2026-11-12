@@ -124,3 +124,9 @@ Android 14) and the Android TV 12 emulator; other TVs may differ.
 ## Signing
 - **Back up the release key and `keystore.properties`.** An APK signed with another key can't update the installed
   app: the TV must uninstall it, and that deletes the launcher's data (export it first: `lx settings export --tv`).
+
+## A host-name check before a download does not stop DNS rebinding
+`InetAddress.getAllByName()` and then `HttpURLConnection` resolve the name twice, and a rebinding DNS server can
+answer with a LAN address the second time. Check the address that was really used: give the `HttpsURLConnection` an
+`SSLSocketFactory` whose layered `createSocket(socket, host, port, autoClose)` looks at `socket.inetAddress` before TLS
+starts (`PublicNet.Guard`). SNI and certificate checks stay as they are.

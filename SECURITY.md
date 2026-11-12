@@ -9,9 +9,9 @@ Open an issue titled "Security contact" and give no details in it. A private way
 will follow in the issue.
 
 ## Known limits
-- **DNS rebinding (low):** for gallery and URL installs, `publicHost()` resolves the host name and checks that it is
-  public, then `HttpURLConnection` resolves it again. A rebinding host could still reach a LAN address. The attacker
-  needs the user to enter their gallery link, or the LAN PIN.
+- **DNS rebinding:** fixed in 1.3.1. Gallery and URL downloads check the host name before connecting, and the TLS
+  layer checks the address the TV really connected to (`PublicNet.Guard`), so a rebinding name can't reach a LAN
+  address. Through a system proxy only the name check applies, because the proxy resolves the name.
 - The LAN install page (`http://<tv>:7190/`) is plain http on the home network, protected by a 6-digit PIN, and open
   only while **Install skin** is on screen.
 - **Accessibility service (optional):** `HomeWatchService` gets only window-state events from Google TV home
