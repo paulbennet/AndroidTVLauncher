@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your Android TV home screen is a web page now: an open launcher anyone can reskin</title>
+<meta name="description" content="People customise their Android TVs with Claude these days. As a frontend dev of more than ten years, I built a home screen made of HTML, CSS and JS, with a speed budget, so everyone can build on it.">
+<link rel="canonical" href="https://paulbennet.github.io/AndroidTVLauncher/blog/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Your Android TV home screen is a web page now: an open launcher anyone can reskin">
+<meta property="og:description" content="People customise their Android TVs with Claude these days. As a frontend dev of more than ten years, I built a home screen made of HTML, CSS and JS, with a speed budget, so everyone can build on it.">
+<meta property="og:image" content="https://paulbennet.github.io/AndroidTVLauncher/blog/cover.png">
+<meta property="og:url" content="https://paulbennet.github.io/AndroidTVLauncher/blog/">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+  :root { color-scheme: dark light; --bg: #0f0e14; --card: #1a1822; --fg: #efeaf7; --muted: #aaa2bd; --accent: #f2a93b; --line: #2c2938; }
+  @media (prefers-color-scheme: light) { :root { --bg: #faf8fc; --card: #efeaf5; --fg: #1d1a24; --muted: #5d566b; --accent: #a35f00; --line: #ddd6e8; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 18px/1.65 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  article { max-width: 44rem; margin: 0 auto; padding: 2.4rem 16px 3rem; }
+  h1 { font-size: clamp(1.7rem, 4.5vw, 2.4rem); line-height: 1.2; margin: 0 0 .6rem; letter-spacing: -.01em; }
+  .lead { color: var(--muted); margin: 0 0 1.6rem; }
+  h2 { font-size: 1.35rem; margin: 2.2rem 0 .4rem; }
+  a { color: var(--accent); }
+  figure { margin: 1.4rem 0; } img { max-width: 100%; height: auto; border-radius: 10px; display: block; }
+  code { font-size: .9em; background: var(--card); padding: .1em .35em; border-radius: .3em; overflow-wrap: anywhere; }
+  pre { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: .9rem 1rem; overflow-x: auto; }
+  pre code { background: none; padding: 0; overflow-wrap: normal; font-size: .85em; }
+  li { margin: .3rem 0; }
+  footer { color: var(--muted); font-size: .9rem; border-top: 1px solid var(--line); margin-top: 2.4rem; padding-top: 1rem; }
+</style>
+</head>
+<body>
+<article>
+<h1>Your Android TV home screen is a web page now: an open launcher anyone can reskin</h1>
+<p class="lead">People customise their Android TVs with Claude these days. As a frontend dev of more than ten years, I built a home screen made of HTML, CSS and JS, with a speed budget, so everyone can build on it.</p>
+<figure><img src="https://paulbennet.github.io/AndroidTVLauncher/blog/skins.gif" alt="Nine skins for Web TV Launcher" loading="lazy"></figure>
+<p>People have started to customise their Android TVs with AI agents. They connect Claude to the TV over ADB, remove the apps they don't want, change the settings, and put in another launcher. It works, and I did the same with my Sony Bravia. But every time, the result stops at &quot;a different launcher that someone else designed&quot;.</p>
+<p>I have built web front ends for more than ten years. When I looked at my TV's home screen, I saw a list of tiles, a focus ring, a clock and a few rows. That is a web page. So I asked: what if the home screen <em>is</em> a web page, and anyone who can write HTML and CSS (or ask an agent to write it) can make their own?</p>
+<p>This post is about <strong>Web TV Launcher</strong>, the open source result. I built it together with Claude Code, and this is what I learned on the way.</p>
+<h2>What it is</h2>
+<ul><li>A home screen for <strong>Android TV and Google TV</strong>: a small Kotlin shell (the APK is about 170 KB) with a WebView. The whole UI is plain HTML, CSS and JavaScript.</li><li><strong>Skins</strong> change everything you see. There are four levels: colour tokens, CSS on the stable components, your own layout file, or your own sandboxed page with JavaScript (frameworks are allowed).</li><li>A <strong>skin gallery</strong>: the TV installs skins from a link, from your phone over the local network, or from a QR code.</li><li><strong>An agent skill</strong> for Claude Code, Codex and other agents, so your agent knows how to set up the TV, make a skin, measure it and publish it.</li><li>No ads, no analytics, no account. MIT licence.</li></ul>
+<h2>The hard part: a TV is not a laptop</h2>
+<p>My TV is a Sony Bravia VU31: Google TV, Android 14, a Mali-G31 GPU and <strong>2 GB of RAM</strong>. Google's own home screen already uses most of it. A web page that runs well on a laptop can stutter on this TV, and a home screen that stutters is worse than no change at all.</p>
+<p>So the launcher does not trust skins. It measures them:</p>
+<ul><li><strong><code>lx lint</code></strong> checks the package: file and image sizes, CSS rules, and animations that run when nothing happens.</li><li><strong><code>lx bench --tv</code></strong> runs the skin on the real TV against the default skin: janky frames per key press, the p95 frame time, key latency, frames while idle, memory and cold start.</li><li>From that, each skin gets a <strong>score and a tier</strong>: Lite, Standard or Rich. A skin that fails only a smoothness gate is <strong>Heavy</strong>: the TV uses it only when its owner turns on &quot;Allow heavy skins&quot;. A skin that draws frames while idle, uses too much memory or starts slowly gets no tier, and <code>lx pack</code> refuses to pack it.</li><li>At run time, a guard goes back to the default skin when a skin hangs, crashes or uses too much memory. Hold Back for 5 seconds for safe mode.</li></ul>
+<p>Skins also can't hurt you: they have no network, can't call the native bridge, and can open only the apps the core gave them, and only when you press OK.</p>
+<h2>What I learned about drawing on a slow TV</h2>
+<p>I benched every idea on the TV, not on my desktop. Some results surprised me:</p>
+<ul><li><strong>Transparency costs a lot.</strong> A translucent tile that moves cost about 15 ms per frame. The same tile, opaque, cost about 6 ms.</li><li><strong>One border radius, not four.</strong> A different radius per corner cost about 14 ms against 7 ms with one radius.</li><li><strong>A full-screen canvas is expensive even when it is still.</strong> It is a GPU layer, and it forces layers for everything above it. Paint the scene once, save it as one opaque picture, and show that.</li><li><strong>Don't zoom the focused tile.</strong> A scale transform re-rasters a big tile on every key. Lift it a little instead.</li><li><strong>&quot;Nothing happens&quot; must mean zero frames.</strong> The idle gate counts every frame at rest. Even a slow fade of the app row is enough to fail it.</li><li><strong>Measure many times.</strong> A single run on the TV can be 50% off. The bench interleaves the default skin and the new skin (default, skin, default, skin …) and uses medians.</li></ul>
+<p>All of these are in <a href="https://github.com/paulbennet/AndroidTVLauncher/blob/main/docs/design-rules.md">docs/design-rules.md</a> and <a href="https://github.com/paulbennet/AndroidTVLauncher/blob/main/docs/gotchas.md">docs/gotchas.md</a>, so you don't have to find them again.</p>
+<h2>Nine skins to start from</h2>
+<p>To test the API, I made nine skins that each try a different idea: a night sky, a sea floor, cut paper, a live aquarium, a cosy winter room, falling code, a terminal, a Bauhaus poster and a toy box for children. Some use three.js, some are only CSS. The live ones move for 20 seconds after a key and then rest, so the TV stays quiet.</p>
+<p>They show the budget honestly: Bauhaus, Phosphor and Playroom are Lite; Constellation is Standard; the live and 3D skins are Heavy on my 2 GB TV. The scores are on the <a href="https://paulbennet.github.io/AndroidTVLauncher/skins/">showcase page</a>.</p>
+<p>The sea floor, aquarium and winter-room pictures are AI-generated, and the notices file says so. The app banners in the pictures are placeholders from the desktop preview.</p>
+<h2>How to try it</h2>
+<p>On the TV:</p>
+<ol><li>Install <strong>Downloader</strong> from the Play Store, open <code>paulbennet.github.io/AndroidTVLauncher/apk</code> in it, and install.</li><li>Open <strong>Web Launcher</strong> and follow <strong>Set up this TV</strong>.</li><li>Open <strong>Launcher settings → Install skin → Skin gallery → Use the Web TV Launcher gallery</strong>, and pick a skin.</li></ol>
+<p>To make your own skin:</p>
+<pre><code class="language-bash">git clone https://github.com/paulbennet/AndroidTVLauncher &amp;&amp; cd AndroidTVLauncher
+npm ci &amp;&amp; npx playwright-core install chromium
+node tools/lx.mjs new my-skin --level 2 --name &quot;My skin&quot;
+node tools/lx.mjs dev my-skin --open        # live preview on the desktop
+node tools/lx.mjs dev my-skin --tv          # live on the TV over ADB, about 1 s per save
+node tools/lx.mjs pack my-skin --tv         # benched on your TV, ready to share</code></pre>
+<p>Or let your agent do it:</p>
+<pre><code class="language-bash">claude plugin marketplace add paulbennet/AndroidTVLauncher
+claude plugin install web-tv-launcher@web-tv-launcher</code></pre>
+<p>Then ask it something like &quot;make me a skin that looks like an old train departure board&quot;.</p>
+<h2>Building it with Claude</h2>
+<p>I wrote the plan, made the decisions and tested on the TV; Claude Code wrote most of the code and the tests, ran the benches over ADB, and kept the docs current. Two things made that work well. First, numbers: every &quot;this feels slow&quot; became a bench result, so the agent could try a fix and prove it. Second, written rules: each trap we found went into <code>gotchas.md</code> and the agent skill, so the next session (or your agent) does not fall into it again.</p>
+<h2>Limits</h2>
+<ul><li>Google TV home shows for about a second before Web Launcher comes back (after a wake, or on Home without a key mapper app).</li><li>Each key press costs WebView 25–30 ms on the first frame on a Mali-G31; skins can't remove that.</li><li>Video stays in the native apps (web DRM is Widevine L3 only). It is not on Google Play.</li></ul>
+<h2>Build on it</h2>
+<p>It is MIT licensed, and the skin API is documented. I would love to see what you make: a skin, a gallery of your own, or a fix for a TV I don't have. Open an issue with a link to your skin.</p>
+<ul><li>Repo: <a href="https://github.com/paulbennet/AndroidTVLauncher">github.com/paulbennet/AndroidTVLauncher</a></li><li>Skins: <a href="https://paulbennet.github.io/AndroidTVLauncher/skins/">paulbennet.github.io/AndroidTVLauncher/skins</a></li><li>Skin guide: <a href="https://github.com/paulbennet/AndroidTVLauncher/blob/main/docs/skin-api.md">docs/skin-api.md</a></li></ul>
+<footer>Paul Bennet · <a href="https://github.com/paulbennet/AndroidTVLauncher">Web TV Launcher on GitHub</a> ·
+<a href="../skins/">Skins</a> · <a href="../">Install</a></footer>
+</article>
+</body>
+</html>

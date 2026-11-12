@@ -10,8 +10,16 @@ performance budget before it reaches a TV.
 | **Marquee** | **Shelf** |
 | ![Marquee skin](docs/img/skin-marquee.png) | ![Shelf skin](docs/img/skin-shelf.png) |
 
-**Version 1.2.0** · Android 7+ (minSdk 24) · built and measured on a Sony Bravia VU31 (Google TV, Android 14, 2 GB RAM)
+**Version 1.3.0** · Android 7+ (minSdk 24) · built and measured on a Sony Bravia VU31 (Google TV, Android 14, 2 GB RAM)
 · MIT licence
+
+## Skin gallery
+![Nine gallery skins](site/blog/skins.gif)
+
+Nine skins to install from the TV: **Launcher settings → Install skin → Skin gallery → Use the Web TV Launcher
+gallery**. Pictures, scores and tiers: [the showcase](https://paulbennet.github.io/AndroidTVLauncher/skins/)
+([docs/showcase.md](docs/showcase.md)). The story behind the project:
+[the blog post](https://paulbennet.github.io/AndroidTVLauncher/blog/) ([docs/blog](docs/blog/web-tv-launcher.md)).
 
 ## Why use it
 - **Skins are web pages, with no build step.** Four levels: colour and size tokens, CSS for the stable components,
@@ -91,6 +99,7 @@ The skill lives in [skills/web-tv-launcher/](skills/web-tv-launcher/SKILL.md); m
 | | |
 |---|---|
 | [setup-guide.md](docs/setup-guide.md) | Set up on a TV, in plain words |
+| [showcase.md](docs/showcase.md) | The gallery skins, their tiers and how to rebuild the gallery |
 | [skin-api.md](docs/skin-api.md) | Making skins: levels, manifest, layout, level 3 SDK, budget, bench, gallery |
 | [development.md](docs/development.md) | Code layout, build, signing, ADB setup, memory, measuring, technical limits |
 | [gotchas.md](docs/gotchas.md) | Google TV, WebView, remote and measuring traps we hit |
